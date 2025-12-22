@@ -80,11 +80,25 @@ class BlackjackTable:
         for player in self.players:
             self.dealCard(player)
             self.dealCard(player)
-        for p in self.players:
-            print(p.name)
-            for c in p.hand:
-                print(c.__dict__)
-            
+        #put this in a helper class
+        for player in self.players:
+            print(f"{player.name} here are your cards")
+            for card in player.hand:
+                print(card.__dict__)
+            userInput = ""
+            while userInput != "s":
+                if userInput == "s":
+                    break
+                elif userInput == "h":
+                    #hit logic
+                    self.dealCard(player)
+                    print(f"badabing badaboom you got a {player.hand[-1].__dict__}")
+                userInput = input("please enter h for hit or s for stay: ")
+            print("your hand is now the following:")
+            for card in player.hand:
+                print(card.__dict__)
+
+
         #then we're going to cycle through the players asking if they want to hit, checking their card value after to see if they bust
         #then we check each players hand looking for max hand, keeping track of all the players that won
 
