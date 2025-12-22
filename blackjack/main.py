@@ -52,6 +52,19 @@ class Player:
         self.name = initName
         self.hand = []
 
+    def calculateHand(self):
+        curTotal = 0
+        numAces = 0
+        for card in self.hand:
+            if card.numberName != "ace":
+                curTotal += card.number
+            else:
+                numAces += 1
+        if curTotal + 11 + numAces - 1 <= 21:
+            curTotal += curTotal + 11 + numAces - 1 <= 21
+        else:
+            curTotal += numAces
+        return curTotal
 
 class BlackjackTable:
     def __init__(self):
@@ -80,21 +93,12 @@ class BlackjackTable:
         winners = []
         curMax = -1
         for player in playerList:
-            curTotal = 0
-            numAces = 0
-            for card in player.hand:
-                if card.numberName != "ace":
-                    curTotal += card.number
-                else:
-                    numAces += 1
-            if curTotal + 11 + numAces - 1 <= 21:
-                curTotal += curTotal + 11 + numAces - 1 <= 21
-            else:
-                curTotal += numAces
-            if curMax < curTotal:
+            handVal = player.calculateHand()
+            if curMax < handVal:
                 winners = [player.name]
-            elif curMax == curTotal:
+            elif curMax == handVal:
                 winners.append(player.name)
+            curMax = max(curMax,handVal)
         return winners
              
             
