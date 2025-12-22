@@ -8,6 +8,8 @@
 # 
 # ok ai is smarter than me, we can create an array of the cards, then swap whichever one we take with one on the end. We can keep track of how many we have dealt and just random amongs the ones that are valid
 #fk it lets give it a shot
+import random
+
 
 class Card:
     def __init__(self):
@@ -39,7 +41,53 @@ class Deck:
 
     def __init__(self):
         self.deck = self.initializeDeck()
-        self.hi = "hi"
+        self.validCards = 52
+
+
+
+class Player:
+    def __init__(self, initName = ""):
+        self.name = initName
+        self.hand = []
+
+
+class BlackjackTable:
+    def __init__(self):
+        self.players = []
+        self.tableDeck = Deck()
+
+    def getPlayers(self):
+        print("enter q to finish adding player names")
+        while True:
+            userInput = input("enter a name for a player (gg if your name is q): ")
+            if userInput == "q":
+                break
+            self.players.append(Player(userInput))
+
+    def dealCard(self, player: Player):
+        cardArr = self.tableDeck.deck
+        validCards = self.tableDeck.validCards
+        rand = random.randint(0, validCards-1)
+        player.hand.append(cardArr[rand])
+        temp = cardArr[rand]
+        cardArr[rand] = cardArr[validCards - 1]
+        cardArr[validCards-1] = temp
+        self.tableDeck.validCards -= 1
+
+    def gameLoop(self):
+        self.getPlayers()
+        #we're going to deal to the players until they have two cards each.
+        for player in self.players:
+            self.dealCard(player)
+            self.dealCard(player)
+        for p in self.players:
+            print(p.name)
+            for c in p.hand:
+                print(c.__dict__)
+            
+        #then we're going to cycle through the players asking if they want to hit, checking their card value after to see if they bust
+        #then we check each players hand looking for max hand, keeping track of all the players that won
+
 
 
 d = Deck().deck
@@ -48,3 +96,6 @@ for c in d:
     print(c.__dict__)
     counter += 1
 print(counter)
+print("starting gameloop")
+table = BlackjackTable()
+table.gameLoop()
