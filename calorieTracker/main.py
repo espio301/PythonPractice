@@ -10,6 +10,12 @@
 """
 
 #store everything to a json object
+import json
+
+def dayEncoder(obj):
+    if isinstance(obj, day):
+        return obj.__dict__
+    raise TypeError()
 
 class food:
     def __init__(self, protein = 0, calories = 0):
@@ -52,6 +58,7 @@ class calorieTracker:
         curDay.totalCalories = curCalories
         print(curDay)
         print(f"on {curDay.dayName} we have gotten a total of {curDay.totalProtein}g of protein, and {curDay.totalCalories} calories")
+        print(json.dumps(curDay, default=dayEncoder))
 
 
 """        while input from user isn't done
