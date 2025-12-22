@@ -8,8 +8,15 @@
 # 
 # ok ai is smarter than me, we can create an array of the cards, then swap whichever one we take with one on the end. We can keep track of how many we have dealt and just random amongs the ones that are valid
 #fk it lets give it a shot
+
+
+
 import random
 
+
+
+#TODO implement dealer
+#add test suite
 
 class Card:
     def __init__(self):
@@ -94,6 +101,8 @@ class BlackjackTable:
         curMax = -1
         for player in playerList:
             handVal = player.calculateHand()
+            if handVal > 21:
+                continue
             if curMax < handVal:
                 winners = [player.name]
             elif curMax == handVal:
@@ -101,8 +110,6 @@ class BlackjackTable:
             curMax = max(curMax,handVal)
         return winners
              
-            
-
     def gameLoop(self):
         self.getPlayers()
         #we're going to deal to the players until they have two cards each.
@@ -119,9 +126,14 @@ class BlackjackTable:
                 if userInput == "s":
                     break
                 elif userInput == "h":
-                    #hit logic
                     self.dealCard(player)
                     print(f"badabing badaboom you got a {player.hand[-1].__dict__}")
+                    if player.calculateHand() > 21:
+                        print("busted")
+                        break
+                    if player.calculateHand == 21:
+                        print("21!")
+                        break
                 userInput = input("please enter h for hit or s for stay: ")
             print("your hand is now the following:")
             for card in player.hand:
@@ -142,3 +154,4 @@ print(counter)
 print("starting gameloop")
 table = BlackjackTable()
 table.gameLoop()
+
