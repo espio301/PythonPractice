@@ -24,6 +24,9 @@ class Deck:
         for n in range(1,14):
             for s in ["spade", "clubs", "hearts", "diamonds"]:
                 c = Card()
+                c.number = n
+                if n >= 10:
+                    c.number = 10
                 if n == 1:
                     c.numberName = "ace"
                 elif n == 11:
@@ -34,7 +37,6 @@ class Deck:
                     c.numberName = "king"
                 else:
                     c.numberName = str(n)
-                c.number = n
                 c.suit = s
                 deck.append(c)
         return deck
@@ -74,6 +76,29 @@ class BlackjackTable:
         cardArr[validCards-1] = temp
         self.tableDeck.validCards -= 1
 
+    def getWinners(self, playerList):
+        winners = []
+        curMax = -1
+        for player in playerList:
+            curTotal = 0
+            numAces = 0
+            for card in player.hand:
+                if card.numberName != "ace":
+                    curTotal += card.number
+                else:
+                    numAces += 1
+            if curTotal + 11 + numAces - 1 <= 21:
+                curTotal += curTotal + 11 + numAces - 1 <= 21
+            else:
+                curTotal += numAces
+            if curMax < curTotal:
+                winners = [player.name]
+            elif curMax == curTotal:
+                winners.append(player.name)
+        return winners
+             
+            
+
     def gameLoop(self):
         self.getPlayers()
         #we're going to deal to the players until they have two cards each.
@@ -98,7 +123,7 @@ class BlackjackTable:
             for card in player.hand:
                 print(card.__dict__)
 
-
+        print("here are the winners: ", self.getWinners(self.players))
         #then we're going to cycle through the players asking if they want to hit, checking their card value after to see if they bust
         #then we check each players hand looking for max hand, keeping track of all the players that won
 
