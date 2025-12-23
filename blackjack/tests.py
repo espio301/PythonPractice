@@ -26,7 +26,7 @@ class UnitTests:
         except Exception as error:
             return False
 
-    #this unit test uses toString, which we probably sohuldnt and we can just make a different way to string a card here
+    #this unit test uses toString, which we probably shouldnt and we can just make a different way to string a card here
     def deckInitTest(self):
         try:
             deck = gl.Deck()
@@ -50,18 +50,36 @@ class UnitTests:
             for k in suitMap:
                 if suitMap[k] != 13:
                     return False
+            print(suitMap)
 
-            numberNameMap = {"ace": 0, "1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "jack": 0, "queen": 0, "king": 0}
+            #checking number Names
+            numberNameMap = {"ace": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "jack": 0, "queen": 0, "king": 0}
             for card in deck.deck:
                 nn = card.numberName
                 if nn not in numberNameMap:
                     numberNameMap[nn] = 0
                 numberNameMap[nn] += 1
+            print(numberNameMap)
             for k in numberNameMap:
-                if k != 4:
+                if numberNameMap[k] != 4:
                     return False
+
+            numberMap = {"ace" : [1,0], "2" : [2,0], "3" : [3,0], "4": [4,0], "5": [5,0], "6": [6,0], "7": [7,0], "8": [8,0], "9": [9,0], "10": [10,0], "jack": [10,0], "queen": [10,0], "king": [10,0]}
+            for card in deck.deck:
+                if card.numberName in numberMap and numberMap[card.numberName][0] == card.number:
+                     numberMap[card.numberName][1] += 1
+            print(numberMap)
+            for k in numberMap:
+                if numberMap[k][1] != 4:
+                    return False
+            return True
+        except Exception as e:
+            print("failed")
+            return False
+
 
 
 ut = UnitTests()
 print(ut.cardInitTest())
 print(ut.cardToStringTest())
+print(ut.deckInitTest())
