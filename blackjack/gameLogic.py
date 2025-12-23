@@ -16,7 +16,8 @@ import random
 
 
 #TODO implement dealer
-#add test suite
+#add custom to string function for different classes,
+#dont use magic methods
 
 class Card:
     def __init__(self):
@@ -24,14 +25,18 @@ class Card:
         self.number = 0
         self.suit = ""
 
+    def toString(self):
+        return "" + str(self.numberName) + " of " + str(self.suit)
+
 #also yes ik I could do this in like one function but this seems better scalability and shouldnt be too much more work if I just get really comfortable definiing classes. I feel like I learn more this way perhaps
 class Deck:
     def initializeDeck(self):
         deck = []
         for n in range(1,14):
-            for s in ["spade", "clubs", "hearts", "diamonds"]:
+            for s in ["spades", "clubs", "hearts", "diamonds"]:
                 c = Card()
                 c.number = n
+                c.numberName = str(n)
                 if n >= 10:
                     c.number = 10
                 if n == 1:
@@ -47,6 +52,13 @@ class Deck:
                 c.suit = s
                 deck.append(c)
         return deck
+
+    def toString(self):
+        curString = ""
+        curString += "valid cards: " + str(self.validCards) + "\n"
+        for c in self.deck:
+            curString += c.toString() + ", "
+        return curString
 
     def __init__(self):
         self.deck = self.initializeDeck()
@@ -144,7 +156,7 @@ class BlackjackTable:
         #then we check each players hand looking for max hand, keeping track of all the players that won
 
 
-
+"""
 d = Deck().deck
 counter = 0
 for c in d:
@@ -153,5 +165,4 @@ for c in d:
 print(counter)
 print("starting gameloop")
 table = BlackjackTable()
-table.gameLoop()
-
+table.gameLoop()"""

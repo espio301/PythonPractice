@@ -7,7 +7,6 @@
     #check win con
     #switch players
 
-from lib2to3.pgen2.token import NEWLINE
 class game:
     def __init__(self):
         self.board = [[0 for x in range(3)] for i in range(3)]
@@ -49,17 +48,33 @@ class game:
     def logBoard(self):
         for row in self.board:
             print(row)
-
+            
+    def sanitizeSpace(self, input):
+        try:
+            splitInput = input.split(",")
+            r = int(splitInput[0])
+            c = int(splitInput[1])
+            if self.board[r][c] != 0:
+                print("you chose an already chosen spot, please pick again!")
+                return False
+            return [r,c]
+        except IndexError:
+            print("out of bounds input")
+            return False
+        except ValueError:
+            print("please input the row and column in the form of r,c where r and c are a integer")
+            return False
+            
     def gameLoop(self):
         gameOver = False
         while not gameOver:
             activePlayer = 'x'
             if self.curTurn % 2:
                 activePlayer = 'o'
-            space = input(f"{activePlayer}, choose your spot in the form row,column: ").split(',')
-            for i in range(len(space)):
-                space[i] = int(space[i])
-            if self.board[space[0]][space[1]] != 0:
+            space = self.sanitizeSpace(input(f"{activePlayer}, choose your spot in the form row,column: "))
+            while not isinstance(space, list):
+                space = self.sanitizeSpace(input("new input: "))
+                print(space, isinstance(space,list))
             self.board[space[0]][space[1]] = activePlayer
             print("\n")
             gameOver = self.isWon(activePlayer)
