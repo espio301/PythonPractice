@@ -182,7 +182,7 @@ class UnitTests:
         #can assume there exists players as we test for this beforehand
     def getWinnersTest(self):
         try:
-            #test for tie
+            #standard test 
             table = gl.BlackjackTable()
             passed = True
             c11 = gl.Card("9", 9, "spades")
@@ -195,6 +195,7 @@ class UnitTests:
                 print(f"failed standard test between {p1.hand.toString()} and {p2.hand.toString()}")
                 passed = False
 
+            #test tie
             c11 = gl.Card("9", 9, "spades")
             c12 = gl.Card("ace", 1, "clubs")
             c21 = gl.Card("8",10, "diamonds")
@@ -205,6 +206,18 @@ class UnitTests:
                 print(f"failed tie between {p1.hand.toString()} and {p2.hand.toString()}")
                 passed = False
 
+            #test for a tie then a winner after
+            c31 = gl.Card("10",10,"spade")
+            c32 = gl.Card("ace", 1, "clubs")
+            p3 = gl.Player("shomik", [c31, c32])
+            if table.getWinners([p1,p2,p3]) != ["shomik"]:
+                print(f"failed tie at first, then a winner is apparent: {p1.hand.toString()}, {p2.hand.toString()}, then {p3.hand.toString()}")
+                passed = False 
+
+            #test empty
+            if table.getWinners([]) != []:
+                print("failed empty player list")
+                passed = False
             return passed
         except Exception as e:
             print(f"failed with error: {e}")
