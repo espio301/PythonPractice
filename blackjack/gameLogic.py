@@ -20,10 +20,10 @@ import random
 #dont use magic methods
 
 class Card:
-    def __init__(self):
-        self.numberName = ""
-        self.number = 0
-        self.suit = ""
+    def __init__(self, nn = "", n = 0, s = ""):
+        self.numberName = nn
+        self.number = n
+        self.suit = s
 
     def toString(self):
         return "" + str(self.numberName) + " of " + str(self.suit)
@@ -58,7 +58,7 @@ class Deck:
         curString += "valid cards: " + str(self.validCards) + "\n"
         for c in self.deck:
             curString += c.toString() + ", "
-        return curString
+        return curString[:-2]
 
     def __init__(self):
         self.deck = self.initializeDeck()
@@ -67,9 +67,14 @@ class Deck:
 
 
 class Player:
-    def __init__(self, initName = ""):
+    def __init__(self, initName = "", cards = None):
         self.name = initName
         self.hand = []
+        if cards != None and isinstance(cards, list):
+            for card in cards:
+                if isinstance(card, Card):
+                    self.hand.append(card)
+            
 
     def calculateHand(self):
         curTotal = 0
@@ -79,11 +84,21 @@ class Player:
                 curTotal += card.number
             else:
                 numAces += 1
-        if curTotal + 11 + numAces - 1 <= 21:
-            curTotal += curTotal + 11 + numAces - 1 <= 21
+        if curTotal + 11 + numAces - 1  <= 21 and numAces >= 1:
+            curTotal += 11 + numAces - 1
         else:
             curTotal += numAces
         return curTotal
+
+    def toString(self):
+        curString = f"{self.name}, hand is: "
+        hadHand = False
+        for card in self.hand:
+            hadHand = True
+            curString += card.toString + ", "
+        if hadHand:
+            return curString[:-2]
+        return curString + "empty"
 
 class BlackjackTable:
     def __init__(self):
@@ -152,6 +167,7 @@ class BlackjackTable:
                 print(card.__dict__)
 
         print("here are the winners: ", self.getWinners(self.players))
+        self.tableDeck.validCards = 52
         #then we're going to cycle through the players asking if they want to hit, checking their card value after to see if they bust
         #then we check each players hand looking for max hand, keeping track of all the players that won
 

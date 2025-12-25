@@ -101,6 +101,7 @@ class UnitTests:
             print("failed: ", e)
             return False
 
+    #need to implement if there are no players
     def getPlayersTest(self):
         try:
             sys.stdin = StringIO()
@@ -122,7 +123,7 @@ class UnitTests:
             if len(table.players) != 0:
                 print("failed empty player list")
                 passed = False
-            #nonstring input, technically speaking thsi should still pass as technically people can have numbers in their name (elons kid has non english alphabet symbols at least)
+            #nonstring input, technically speaking this should still pass as technically people can have numbers in their name (elons kid has non english alphabet symbols at least)
             table = gl.BlackjackTable()
             sys.stdin.write("123\nq\n")
             sys.stdin.seek(17)
@@ -134,15 +135,62 @@ class UnitTests:
         except Exception as e:
             print(f"failed with error: {e}")
             return False
+        
+        #mainly need to assure aces logic works appropriately
+    def calculateHandTest(self):
+    #check standard test
+        passed = True
+        c1 = gl.Card("2",2,"clubs")
+        c2 = gl.Card("3",3,"clubs")
+        p1 = gl.Player("andrew", [c1,c2])
+        if p1.calculateHand() != 5:
+            print(f"failed standard test, hand val was {p1.calculateHand()} when cards were {c1.numberName} and {c2.numberName}")
+            passed = False
+
+        c1 = gl.Card("ace",1,"clubs")
+        c2 = gl.Card("ace",1,"spade")
+        p1 = gl.Player("andrew", [c1,c2])
+        if p1.calculateHand() != 12:
+            print(f"failed double aces test, hand val was {p1.calculateHand()} when cards were {c1.numberName} and {c2.numberName}")
+            passed = False
+
+        c1 = gl.Card("jack",10,"clubs")
+        c2 = gl.Card("ace",1,"spade")
+        c3 = gl.Card("5",5,"spade")
+
+        p1 = gl.Player("andrew", [c1,c2,c3])
+        if p1.calculateHand() != 16:
+            print(f"failed 3 cards with ace thats less than 11 test, hand val was {p1.calculateHand()} when cards were {c1.numberName}, {c2.numberName}, and {c3.numberName}")
+            passed = False
+
+        c1 = gl.Card("jack",10,"clubs")
+        c2 = gl.Card("9",9,"spade")
+        c3 = gl.Card("10",10,"spade")
+        p1 = gl.Player("andrew", [c1,c2,c3])
+        if p1.calculateHand() != 29:
+            print(f"bust test, hand val was {p1.calculateHand()} when cards were {c1.numberName}, {c2.numberName}, and {c3.numberName}")
+            passed = False
+
+        c1 = gl.Card("ace",1,"clubs")
+        c2 = gl.Card("ace",1,"spade")
+        c3 = gl.Card("10",10,"spade")
+        p1 = gl.Player("andrew", [c1,c2,c3])
+        if p1.calculateHand() != 12:
+            print(f"failed multiple aces, neither 11 test, hand val was {p1.calculateHand()} when cards were {c1.numberName}, {c2.numberName}, and {c3.numberName}")
+            passed = False
 
 
-            for player in table.players:
-                print(player.toString())
-
-
-        except Exception as e:
-            print(f"failed with exception: {e}")
-
+        return passed
+        #can assume there exists players as we test for this beforehand
+    def testGetWinners(self):
+        #test for tie
+        table = gl.table
+        c11 = gl.Card("")
+        p1 = gl.Player()
+        h1 = [gl.card()]
+        #test for one player who bust
+        #standard test between two players
+        #standard test between 3 players
 
 ut = UnitTests()
 deck = gl.Deck()
@@ -151,7 +199,7 @@ deck = gl.Deck()
 #text = input()
 #print(f"{text=}")
 
-print(ut.getPlayersTest())
+print(ut.calculateHandTest())
 """print(ut.cardInitTest())
 print(ut.cardToStringTest())
 #print(ut.deckInitTest())
