@@ -178,16 +178,37 @@ class UnitTests:
         if p1.calculateHand() != 12:
             print(f"failed multiple aces, neither 11 test, hand val was {p1.calculateHand()} when cards were {c1.numberName}, {c2.numberName}, and {c3.numberName}")
             passed = False
-
-
         return passed
         #can assume there exists players as we test for this beforehand
-    def testGetWinners(self):
-        #test for tie
-        table = gl.table
-        c11 = gl.Card("")
-        p1 = gl.Player()
-        h1 = [gl.card()]
+    def getWinnersTest(self):
+        try:
+            #test for tie
+            table = gl.BlackjackTable()
+            passed = True
+            c11 = gl.Card("9", 9, "spades")
+            c12 = gl.Card("ace", 1, "clubs")
+            c21 = gl.Card("8", 8, "spades")
+            c22 = gl.Card("10", 10, "spades")
+            p1 = gl.Player("andrew", [c11,c12])
+            p2 = gl.Player("james", [c21,c22])
+            if table.getWinners([p1,p2]) != ["andrew"]:
+                print(f"failed standard test between {p1.hand.toString()} and {p2.hand.toString()}")
+                passed = False
+
+            c11 = gl.Card("9", 9, "spades")
+            c12 = gl.Card("ace", 1, "clubs")
+            c21 = gl.Card("8",10, "diamonds")
+            c22 = gl.Card("10", 10, "spades")
+            p1 = gl.Player("andrew", [c11,c12])
+            p2 = gl.Player("james", [c21,c22])
+            if table.getWinners([p1,p2]) != ["andrew", "james"]:
+                print(f"failed tie between {p1.hand.toString()} and {p2.hand.toString()}")
+                passed = False
+
+            return passed
+        except Exception as e:
+            print(f"failed with error: {e}")
+            return False
         #test for one player who bust
         #standard test between two players
         #standard test between 3 players
@@ -199,7 +220,7 @@ deck = gl.Deck()
 #text = input()
 #print(f"{text=}")
 
-print(ut.calculateHandTest())
+print(ut.getWinnersTest())
 """print(ut.cardInitTest())
 print(ut.cardToStringTest())
 #print(ut.deckInitTest())
