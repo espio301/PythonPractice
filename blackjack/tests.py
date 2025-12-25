@@ -226,6 +226,19 @@ class UnitTests:
         #standard test between two players
         #standard test between 3 players
 
+    #this one's fairly important, need to check that we don't deal repeated card ever.
+    #we're going to deal all 52 cards and make sure each card dealt is unique
+    def dealTest(self):
+        cardSet = set()
+        table = gl.BlackjackTable()
+        p1 = gl.Player()
+        while table.tableDeck.validCards > 0:
+            card = table.dealCard(p1)
+            assert card.toString() == p1.hand[-1].toString()
+            assert card.toString() not in cardSet
+            cardSet.add(card.toString)
+        return True
+
 ut = UnitTests()
 deck = gl.Deck()
 #sys.stdin.write("myinput")
@@ -233,7 +246,7 @@ deck = gl.Deck()
 #text = input()
 #print(f"{text=}")
 
-print(ut.getWinnersTest())
+print(ut.dealTest())
 """print(ut.cardInitTest())
 print(ut.cardToStringTest())
 #print(ut.deckInitTest())
