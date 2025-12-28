@@ -114,14 +114,17 @@ class BlackjackTable:
             self.players.append(Player(userInput))
 
     def dealCard(self, player: Player):
+        if self.tableDeck.validCards <= 0:
+            raise ValueError("deck is out of cards, something is awry")
         cardArr = self.tableDeck.deck
         validCards = self.tableDeck.validCards
         rand = random.randint(0, validCards-1)
         player.hand.append(cardArr[rand])
-        temp = cardArr[rand]
+        dealtCard = cardArr[rand]
         cardArr[rand] = cardArr[validCards - 1]
-        cardArr[validCards-1] = temp
+        cardArr[validCards-1] = dealtCard
         self.tableDeck.validCards -= 1
+        return dealtCard
 
     def getWinners(self, playerList):
         winners = []
@@ -147,14 +150,14 @@ class BlackjackTable:
         for player in self.players:
             print(f"{player.name} here are your cards")
             for card in player.hand:
-                print(card.__dict__)
+                print(card.toString())
             userInput = ""
             while userInput != "s":
                 if userInput == "s":
                     break
                 elif userInput == "h":
                     self.dealCard(player)
-                    print(f"badabing badaboom you got a {player.hand[-1].__dict__}")
+                    print(f"badabing badaboom you got a {player.hand[-1].toString()}")
                     if player.calculateHand() > 21:
                         print("busted")
                         break
@@ -164,13 +167,15 @@ class BlackjackTable:
                 userInput = input("please enter h for hit or s for stay: ")
             print("your hand is now the following:")
             for card in player.hand:
-                print(card.__dict__)
+                print(card.toString())
 
         print("here are the winners: ", self.getWinners(self.players))
         self.tableDeck.validCards = 52
         #then we're going to cycle through the players asking if they want to hit, checking their card value after to see if they bust
         #then we check each players hand looking for max hand, keeping track of all the players that won
 
+if __name__ == "__main__":
+    BlackjackTable().gameLoop()
 
 """
 d = Deck().deck
