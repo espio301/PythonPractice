@@ -52,6 +52,7 @@ class game:
     def sanitizeSpace(self, input):
         try:
             splitInput = input.split(",")
+            print(int(splitInput[0]),int(splitInput[1]))
             r = int(splitInput[0])
             c = int(splitInput[1])
             if self.board[r][c] != 0:
