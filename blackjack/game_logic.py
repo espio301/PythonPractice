@@ -1,27 +1,11 @@
-#a deck has 52 cards
-# the dealer deals the four cards, whoever comes closer to 21 wins, if a player goes over 21 they bust and lose
-#for simplicity we won't have a special blackjack property just yet as well as no splitting (cause im ngl, I don't actually know how that works in the game xd, lets just add that later :) )
-
-#ok so before thinking about hands and whatnot, lets think about how to store cards. we need to make sure that no two cards dealt are the same.
-# if we store them in a list and remove them thats a long operation each time, obviously can keep a seenSet though. that being said if we rng keep getting cards and check if its in the seenSet, then we can technically get unlucky and just keep hitting the same one xd. While unlikely lets think of a new way to do it.
-# removing an item from a dictionary is O(1) and so is adding it but how do we obtain a random element from a library.
-# 
-# ok ai is smarter than me, we can create an array of the cards, then swap whichever one we take with one on the end. We can keep track of how many we have dealt and just random amongs the ones that are valid
-#fk it lets give it a shot
-
-
-
 import random
 
-
-
-#TODO implement dealer
-#add custom to string function for different classes,
-#dont use magic methods
 
 SUITS_LIST = ["spades", "clubs", "hearts", "diamonds"]
 RANKS_LIST = ["ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king"]
 VALID_ACTIONS = {"s", "h"}
+
+#TODO: break card/deck/player into a new module
 class Card:
     def __init__(self, rank : str, value : int, suit : str):
         self.rank = rank
@@ -29,33 +13,35 @@ class Card:
         self.suit = suit
         
     def to_string(self):
-        return "" + str(self.rank) + " of " + str(self.suit)
+        return f"{str(self.rank)} of {str(self.suit)}"
 
     def is_ace(self):
         return self.rank == "ace"
 
-#also yes ik I could do this in like one function but this seems better scalability and shouldnt be too much more work if I just get really comfortable definiing classes. I feel like I learn more this way perhaps
 class Deck:
     def __init__(self):
         self.deck = self.initialize_deck()
 
     def initialize_deck(self):
         deck = []
-        #theres perhaps a better way to write this array but is fine for readability?
-        for i, init_rank in enumerate(RANKS_LIST):
-            for init_suit in SUITS_LIST:
-                init_value = i + 1
-                if init_value >= 10:
-                    init_value = 10
-                deck.append(Card(init_rank, init_value, init_suit ))
+        for i, card_rank in enumerate(RANKS_LIST):
+            for card_suit in SUITS_LIST:
+                card_value = i + 1
+                if card_value >= 10:
+                    card_value = 10
+                deck.append(Card(card_rank, card_value, card_suit))
         return deck
 
     def to_string(self):
-        deck_string = f"cards in deck: {str(len(self.deck))}\n"
-        for c in self.deck:
-            deck_string += ", ".join([deck_string, c.to_string()])
-        return deck_string
+        prefix_num_cards = f"cards in deck: {str(len(self.deck))}\n"
+        decks_cards_as_string = ", ".join(self.card_strings_as_list())
+        return prefix_num_cards + decks_cards_as_string
 
+    def card_strings_as_list():
+        all_cards_list = []
+        for card in self.deck:
+            all_cards_list.append(card.to_string())
+        return all_cards_list
 
 
 class Player:
@@ -71,30 +57,46 @@ class Player:
         return False
 
     def calculate_hand(self):
-        total = 0
-        aces_count = 0
+        total_without_aces = self.hand_total_other_than_aces()
+        aces_count = self.count_aces_in_hand()
+
+        if aces_count >= 1 and total_with_one_ace_is_eleven() <= 21:
+            return total_with_one_ace_is_eleven()
+        return total_without_aces + aces_count
+
+    def total_with_one_ace_is_eleven():
+        total_with_ace_eleven = self.hand_total_other_than_aces() + 11
+        num_other_aces = self.count_aces_in_hand() - 1
+        return total_with_ace_eleven + num_other_aces
+
+    def hand_total_other_than_aces():
+        count = 0
         for card in self.hand:
             if not card.is_ace():
-                total += card.value
-            else:
-                aces_count += 1
-        #we would only ever want 1 ace to count as an 11. if we have an ace, and we don't bust for one to count as an 11, then our total is our expected sum, but one ace is an 11.
-        if total + 11 + aces_count - 1  <= 21 and aces_count >= 1:
-            total += 11 + aces_count - 1
-        #otherwise, we don't want the ace to count as 11, and so each ace would count as 1
-        else:
-            total += aces_count
-        return total
+                count += card.value
+        return count
+
+    def count_aces_in_hand():
+        count = 0
+        for card in self.hand():
+            if card.is_ace():
+                count += 1
+        return count
 
     def to_string(self):
-        player_string = f"{self.name}, hand is: "
+        prefix_string = f"{self.name}, hand is: "
         if len(self.hand) == 0:
-            return player_string + "empty"
+            return prefix_string + "empty"
 
+        hand_string = ", ".join(selfhand_to_string())
+        return  prefix_string + hand_string
+    
+    def hand_to_string():
         card_list = []
         for card in self.hand:
             card_list.append(card.to_string())
-        return  player_string + ", ".join(card_list)
+        return card_list
+
 
 class BlackjackTable:
     def __init__(self):
@@ -123,6 +125,7 @@ class BlackjackTable:
         return
 
     # the book mentions output arguments are bad, is this fine or should this be changed?
+    #TODO: theres a bug here in card_to_deal. but this will need to be refactored due to law of demeter anyways. this method is far too awarege of deck functionality. perhaps move dealing to deck instead, seems better fit for the abstraction.
     def deal_card(self, player: Player):
         card_to_deal = self.table_deck.deck.pop()
         player.hand.append(card_to_deal)
@@ -208,17 +211,6 @@ class BlackjackTable:
         #then we check each players hand looking for max hand, keeping track of all the players that won
 
 if __name__ == "__main__":
-    Black().gameLoop()
-"""    table = Black
-    shomik = Player("shomik",[])
-    table.add_player(Player("shomik"))
-    table.add_player(Player("james"))
-    table.dealCard(shomik)
-    table.dealCard(shomik)
+    table = BlackjackTable()
+    table.gameLoop()
 
-    hand_value = table.player_hit(shomik)
-    if hand_value > 21:
-        print("shomik busted xd")
-    
-
-"""
