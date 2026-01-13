@@ -38,7 +38,6 @@ class Card:
 class Deck:
     def __init__(self):
         self.deck = self.initialize_deck()
-        self.validCards = len(self.deck)
 
     def initialize_deck(self):
         deck = []
@@ -52,7 +51,7 @@ class Deck:
         return deck
 
     def to_string(self):
-        deck_string += f"valid cards: {str(self.validCards)}\n"
+        deck_string = f"cards in deck: {str(len(self.deck))}\n"
         for c in self.deck:
             deck_string += ", ".join([deck_string, c.to_string()])
         return deck_string
@@ -97,7 +96,7 @@ class Player:
             card_list.append(card.to_string())
         return  player_string + ", ".join(card_list)
 
-class Black:
+class BlackjackTable:
     def __init__(self):
         self.players = []
         self.table_deck = Deck()
@@ -113,7 +112,7 @@ class Black:
     def add_player(self, player: Player):
         self.players.append(player)
 
-    def getPlayers(self):
+    def get_players(self):
         print("enter q to finish adding player names")
         while True:
             userInput = input("enter a name for a player (gg if your name is q): ")
@@ -123,15 +122,16 @@ class Black:
             self.add_player(Player(userInput))
         return
 
-    def dealCard(self, player: Player):
-        player.hand.append(self.table_deck.deck.pop())
-
-
+    # the book mentions output arguments are bad, is this fine or should this be changed?
+    def deal_card(self, player: Player):
+        card_to_deal = self.table_deck.deck.pop()
+        player.hand.append(card_to_deal)
+        self.used_cards.append(card_to_deal)
 
     def starting_deal(self):
         for player in self.players:
-            self.dealCard(player)
-            self.dealCard(player)
+            self.deal_card(player)
+            self.deal_card(player)
             player.to_string()
 
     def get_winners(self, playerList):
@@ -194,7 +194,7 @@ class Black:
         return
 
     def gameLoop(self):
-        self.getPlayers()
+        self.get_players()
         self.shuffle_deck(self.table_deck)
         self.starting_deal()
 
