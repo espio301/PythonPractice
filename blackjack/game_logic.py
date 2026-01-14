@@ -1,6 +1,5 @@
 import random
 
-
 SUITS_LIST = ["spades", "clubs", "hearts", "diamonds"]
 RANKS_LIST = ["ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king"]
 VALID_ACTIONS = {"s", "h"}
@@ -12,6 +11,9 @@ class Card:
         self.value = value
         self.suit = suit
         
+    def deep_copy(self):
+        return Card(self.rank, self.value, self.suit)
+
     def to_string(self):
         return f"{str(self.rank)} of {str(self.suit)}"
 
@@ -21,6 +23,7 @@ class Card:
 class Deck:
     def __init__(self):
         self.deck = self.initialize_deck()
+        self.used_cards = []
 
     def initialize_deck(self):
         deck = []
@@ -37,6 +40,22 @@ class Deck:
         decks_cards_as_string = ", ".join(self.card_strings_as_list())
         return prefix_num_cards + decks_cards_as_string
 
+    def deal_card_to(self, card_list):
+        card = self.deck.pop()
+        card_list.append(card)
+        self.used_cards.append(card)
+        return card_list
+
+    def shuffle(self):
+        self.deck.extend(self.used_cards)
+        self.used_cards = []
+        for i in range(0,len(self.deck)):
+            index_card = self.deck[i]
+            random_index = random.randrange(0,len(self.deck))
+            swap_card = self.deck[random_index]
+            self.deck[random_index] = index_card
+            self.deck[i] = swap_card
+
     def card_strings_as_list():
         all_cards_list = []
         for card in self.deck:
@@ -51,7 +70,16 @@ class Player:
         for card in cards:
             self.hand.append(card)
     
-    def didBust(self):
+    def get_hand(self):
+        deep_copy_hand = []
+        for card in self.hand:
+            deep_copy_hand.append(card.deep_copy())
+        return deep_copy_hand
+
+    def set_hand(self, card_list : list[Card]):
+        self.hand = card_list
+
+    def did_bust(self):
         if self.calculate_hand() > 21:
             return True
         return False
@@ -60,25 +88,25 @@ class Player:
         total_without_aces = self.hand_total_other_than_aces()
         aces_count = self.count_aces_in_hand()
 
-        if aces_count >= 1 and total_with_one_ace_is_eleven() <= 21:
+        if aces_count >= 1 and self.total_with_one_ace_is_eleven() <= 21:
             return total_with_one_ace_is_eleven()
         return total_without_aces + aces_count
 
-    def total_with_one_ace_is_eleven():
+    def total_with_one_ace_is_eleven(self):
         total_with_ace_eleven = self.hand_total_other_than_aces() + 11
         num_other_aces = self.count_aces_in_hand() - 1
         return total_with_ace_eleven + num_other_aces
 
-    def hand_total_other_than_aces():
+    def hand_total_other_than_aces(self):
         count = 0
         for card in self.hand:
             if not card.is_ace():
                 count += card.value
         return count
 
-    def count_aces_in_hand():
+    def count_aces_in_hand(self):
         count = 0
-        for card in self.hand():
+        for card in self.hand:
             if card.is_ace():
                 count += 1
         return count
@@ -88,10 +116,10 @@ class Player:
         if len(self.hand) == 0:
             return prefix_string + "empty"
 
-        hand_string = ", ".join(selfhand_to_string())
+        hand_string = ", ".join(self.hand_to_string())
         return  prefix_string + hand_string
     
-    def hand_to_string():
+    def hand_to_string(self):
         card_list = []
         for card in self.hand:
             card_list.append(card.to_string())
@@ -102,10 +130,9 @@ class BlackjackTable:
     def __init__(self):
         self.players = []
         self.table_deck = Deck()
-        self.used_cards = Deck()
 
     def player_hit(self, player: Player):
-        self.dealCard(player)
+        self.deal_to(player)
         return player.calculate_hand()
 
     def player_stay(self, player: Player):
@@ -120,21 +147,19 @@ class BlackjackTable:
             userInput = input("enter a name for a player (gg if your name is q): ")
             if userInput == "q":
                 break
-            #print(f"adding user with the name {userInput}")
             self.add_player(Player(userInput))
         return
 
-    # the book mentions output arguments are bad, is this fine or should this be changed?
-    #TODO: theres a bug here in card_to_deal. but this will need to be refactored due to law of demeter anyways. this method is far too awarege of deck functionality. perhaps move dealing to deck instead, seems better fit for the abstraction.
-    def deal_card(self, player: Player):
-        card_to_deal = self.table_deck.deck.pop()
-        player.hand.append(card_to_deal)
-        self.used_cards.append(card_to_deal)
+    def deal_to(self, player: Player):
+        print(player)
+        hand = player.get_hand()
+        self.table_deck.deal_card_to(hand)
+        player.set_hand(hand)
 
     def starting_deal(self):
         for player in self.players:
-            self.deal_card(player)
-            self.deal_card(player)
+            self.deal_to(player)
+            self.deal_to(player)
             player.to_string()
 
     def get_winners(self, playerList):
@@ -168,8 +193,7 @@ class BlackjackTable:
         return
 
     def shuffle_deck(self, table_deck : Deck):
-        self.table_deck.deck = self.table_deck.deck + self.used_cards.deck
-        random.shuffle(self.table_deck.deck)
+        self.table_deck.shuffle()
         return True
 
     def get_user_action(self, player):
