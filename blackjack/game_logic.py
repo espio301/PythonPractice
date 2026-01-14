@@ -1,135 +1,13 @@
-import random
+import Card
+import Deck
+import Player
 
-SUITS_LIST = ["spades", "clubs", "hearts", "diamonds"]
-RANKS_LIST = ["ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king"]
 VALID_ACTIONS = {"s", "h"}
-
-#TODO: break card/deck/player into a new module
-class Card:
-    def __init__(self, rank : str, value : int, suit : str):
-        self.rank = rank
-        self.value = value
-        self.suit = suit
-        
-    def deep_copy(self):
-        return Card(self.rank, self.value, self.suit)
-
-    def to_string(self):
-        return f"{str(self.rank)} of {str(self.suit)}"
-
-    def is_ace(self):
-        return self.rank == "ace"
-
-class Deck:
-    def __init__(self):
-        self.deck = self.initialize_deck()
-        self.used_cards = []
-
-    def initialize_deck(self):
-        deck = []
-        for i, card_rank in enumerate(RANKS_LIST):
-            for card_suit in SUITS_LIST:
-                card_value = i + 1
-                if card_value >= 10:
-                    card_value = 10
-                deck.append(Card(card_rank, card_value, card_suit))
-        return deck
-
-    def to_string(self):
-        prefix_num_cards = f"cards in deck: {str(len(self.deck))}\n"
-        decks_cards_as_string = ", ".join(self.card_strings_as_list())
-        return prefix_num_cards + decks_cards_as_string
-
-    def deal_card_to(self, card_list):
-        card = self.deck.pop()
-        card_list.append(card)
-        self.used_cards.append(card)
-        return card_list
-
-    def shuffle(self):
-        self.deck.extend(self.used_cards)
-        self.used_cards = []
-        for i in range(0,len(self.deck)):
-            index_card = self.deck[i]
-            random_index = random.randrange(0,len(self.deck))
-            swap_card = self.deck[random_index]
-            self.deck[random_index] = index_card
-            self.deck[i] = swap_card
-
-    def card_strings_as_list():
-        all_cards_list = []
-        for card in self.deck:
-            all_cards_list.append(card.to_string())
-        return all_cards_list
-
-
-class Player:
-    def __init__(self, name : str, cards = []):
-        self.name = name
-        self.hand = []
-        for card in cards:
-            self.hand.append(card)
-    
-    def get_hand(self):
-        deep_copy_hand = []
-        for card in self.hand:
-            deep_copy_hand.append(card.deep_copy())
-        return deep_copy_hand
-
-    def set_hand(self, card_list : list[Card]):
-        self.hand = card_list
-
-    def did_bust(self):
-        if self.calculate_hand() > 21:
-            return True
-        return False
-
-    def calculate_hand(self):
-        total_without_aces = self.hand_total_other_than_aces()
-        aces_count = self.count_aces_in_hand()
-
-        if aces_count >= 1 and self.total_with_one_ace_is_eleven() <= 21:
-            return total_with_one_ace_is_eleven()
-        return total_without_aces + aces_count
-
-    def total_with_one_ace_is_eleven(self):
-        total_with_ace_eleven = self.hand_total_other_than_aces() + 11
-        num_other_aces = self.count_aces_in_hand() - 1
-        return total_with_ace_eleven + num_other_aces
-
-    def hand_total_other_than_aces(self):
-        count = 0
-        for card in self.hand:
-            if not card.is_ace():
-                count += card.value
-        return count
-
-    def count_aces_in_hand(self):
-        count = 0
-        for card in self.hand:
-            if card.is_ace():
-                count += 1
-        return count
-
-    def to_string(self):
-        prefix_string = f"{self.name}, hand is: "
-        if len(self.hand) == 0:
-            return prefix_string + "empty"
-
-        hand_string = ", ".join(self.hand_to_string())
-        return  prefix_string + hand_string
-    
-    def hand_to_string(self):
-        card_list = []
-        for card in self.hand:
-            card_list.append(card.to_string())
-        return card_list
-
 
 class BlackjackTable:
     def __init__(self):
         self.players = []
-        self.table_deck = Deck()
+        self.table_deck = Deck.Deck()
 
     def player_hit(self, player: Player):
         self.deal_to(player)
@@ -147,7 +25,7 @@ class BlackjackTable:
             userInput = input("enter a name for a player (gg if your name is q): ")
             if userInput == "q":
                 break
-            self.add_player(Player(userInput))
+            self.add_player(Player.Player(userInput))
         return
 
     def deal_to(self, player: Player):
