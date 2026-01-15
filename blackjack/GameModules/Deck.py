@@ -1,5 +1,4 @@
 import Card
-import Deck
 import random
 
 SUITS_LIST = ["spades", "clubs", "hearts", "diamonds"]
