@@ -17,11 +17,11 @@ class deck_tests:
     def deck_init_test(self):
         deck = gm.Deck().deck
         #we can actually prove we have 1 of each card without hard coding anything by defining that each card is unique, and then that there are 13 of each suit and 4 of each card! pretty neat if you ask me :)
-        self.check_card_count(deck) == True
-        self.check_card_uniqueness(deck) == True
-        assert self.check_suit_correctness(deck) == True
-        assert self.check_rank_count(deck) == True
-        assert self.check_value_correctness(deck)
+        self.check_card_count(deck)
+        self.check_card_uniqueness(deck)
+        self.check_suit_correctness(deck)
+        self.check_rank_count(deck)
+        self.check_value_correctness(deck)
 
 
     def check_card_count(self, deck):
@@ -49,8 +49,9 @@ class deck_tests:
                 raise Exception('failed suit count check, one suit totalled to not having 13 cards')
 
     def check_rank_count(self, deck):
-        rank_map = self.map_decks_ranks()
-        assert check_rank_map_correctness(rank_map)
+        deck_obj = gm.Deck()
+        rank_map = self.map_decks_ranks(deck_obj.deck)
+        assert self.check_rank_map_correctness(rank_map)
 
     def map_decks_ranks(self,deck):
         rank_map = {"ace": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "jack": 0, "queen": 0, "king": 0}
@@ -86,7 +87,8 @@ class deck_tests:
                 raise Exception(f"one value, {rank_count_map[rank]} has an improper amount for it's rank, {rank}")
 
     def deck_to_string_test(self):
-        assert get_expected_string() == deck.to_string()
+        deck_obj = gm.Deck()
+        assert self.get_expected_string() == deck_obj.to_string()
 
     def get_expected_string(self):
         deck = gm.Deck().deck
@@ -115,8 +117,8 @@ class deck_tests:
                 raise Exception("found the dealt card inside our deck")
 
     def deck_shuffle_test(self):
-        shuffled_obj = gm.Deck().shuffle()
-        shuffled_deck = shuffled_obj.deck
+        shuffled_obj = gm.Deck()
+        shuffled_obj.shuffle()
         unshuffled_deck = gm.Deck().deck
 
         self.check_used_cards(shuffled_obj)

@@ -1,4 +1,4 @@
-import Card
+import GameModules.Card as Card
 import random
 
 SUITS_LIST = ["spades", "clubs", "hearts", "diamonds"]
@@ -40,7 +40,7 @@ class Deck:
             self.deck[random_index] = index_card
             self.deck[i] = swap_card
 
-    def card_strings_as_list():
+    def card_strings_as_list(self):
         all_cards_list = []
         for card in self.deck:
             all_cards_list.append(card.to_string())
