@@ -5,7 +5,7 @@ class card_tests:
         self.deep_copy_test()
         self.to_string_test()
         self.is_ace_test()
-        print("finished")
+        print("finished card tests")
 
     def deep_copy_test(self):
         card_to_change = gm.Card("ace", 1, "clubs")

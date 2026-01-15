@@ -12,7 +12,7 @@ class deck_tests:
         self.deck_to_string_test()
         self.deck_deal_test()
         self.deck_shuffle_test()
-        print("finished")
+        print("finished deck tests")
 
     def deck_init_test(self):
         deck = gm.Deck().deck
