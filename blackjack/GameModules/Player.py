@@ -1,4 +1,4 @@
-import Card
+import GameModules.Card as Card
 
 class Player:
     def __init__(self, name : str, cards = []):
@@ -26,7 +26,7 @@ class Player:
         aces_count = self.count_aces_in_hand()
 
         if aces_count >= 1 and self.total_with_one_ace_is_eleven() <= 21:
-            return total_with_one_ace_is_eleven()
+            return self.total_with_one_ace_is_eleven()
         return total_without_aces + aces_count
 
     def total_with_one_ace_is_eleven(self):
@@ -61,3 +61,4 @@ class Player:
         for card in self.hand:
             card_list.append(card.to_string())
         return card_list
+

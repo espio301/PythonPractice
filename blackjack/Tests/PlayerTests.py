@@ -5,12 +5,14 @@ from GameModules.Card import Card
 class player_tests:
     def run_all(self):
         self.player_did_bust_test()
+        self.calculate_hand_test()
+        self.player_to_string_test()
         print("finished player tests")
 
     def player_did_bust_test(self):
-        self.check_did_bust_ace()
-        self.check_did_bust_no_ace()
-        self.check_didnt_bust()
+        self.player_did_bust_ace()
+        self.player_did_bust_no_ace()
+        self.player_did_bust_no_ace()
         
     def player_did_bust_ace(self):
         assert Player("andrew", [Card("10", 10, "clubs"), Card("10", 10, "diamonds"), Card("10", 10, "spades"), Card("ace", 1, "clubs")]).did_bust()
@@ -22,50 +24,53 @@ class player_tests:
         assert not Player("andrew", [Card("10", 10, "clubs"), Card("10", 10, "diamonds")]).did_bust()
 
     def calculate_hand_test(self):
-    #check standard test
-        self.calculate_no_ace_hand()
-        self.calculate_with_ace_hand()
-        return passed
+        self.calculate_no_ace_hands()
+        self.calculate_with_ace_hands()
+        self.calculate_multiple_ace_hands()
 
-    def calculate_no_ace_hand():
-        no_ace_deck = self.get_deck_no_aces()
-        for card in deck:
-            if deck.rank == "ace":
-                continue
-            no_ace_deck.append(card)
+    def calculate_no_ace_hands(self):
+        self.calculate_no_ace_busted()
+        self.calculate_no_ace_winnable()
         
-        #hard coding 48 as if the length isn't 48 we have a different issue in deck initialization
-        hand = []
-        hand_value = 0
-        while len(no_ace_deck) > 0:
-            #we're going to get a random card from the no ace deck
-            index = random.randrange(0,len(no_ace_deck))
-            card = no_ace_deck[index]
-            no_ace_deck.remove[index]
-            #add it to the hand
-            hand.append(card)
+    def calculate_no_ace_busted(self):
+        self.calculate_hand_helper([Card("10", 10, "clubs"), Card("10", 10, "diamonds"), Card("9", 9, "hearts")], 29)
+        self.calculate_hand_helper([Card("10", 10, "clubs"), Card("10", 10, "diamonds"), Card("5", 5, "hearts")], 25)
 
-            #check if calculation is correct
-            hand_value += card.value
-            gl.Player("andrew", hand)
-            assert hand_value == gl.Player()
+    def calculate_no_ace_winnable(self):
+        self.calculate_hand_helper([Card("10", 10, "clubs"), Card("10", 10, "diamonds")], 20)
+        self.calculate_hand_helper([Card("10", 10, "clubs"), Card("5", 5, "diamonds"), Card("5", 5, "hearts")], 20)
 
-        print("passed")
+    def calculate_with_ace_hands(self):
+        self.caluclate_ace_busted()
+        self.calculate_ace_winnable()
 
+    def caluclate_ace_busted(self):
+        self.calculate_hand_helper([Card("ace",1,"spades"), Card("jack", 10, "clubs"), Card("5", 5, "spades"), Card("10", 10, "spades")], 26)
+        self.calculate_hand_helper([Card("ace",1,"spades"), Card("jack", 10, "clubs"), Card("9", 9, "spades"), Card("8", 8, "spades")], 28)
 
-        def player_to_string_test(self):
-            self.check_empty_hand()
-            self.check_empty_name()
-            self.check_multiple_cards()
-            assert Player("Andrew")
+    def calculate_ace_winnable(self):
+        self.calculate_hand_helper([Card("ace",1,"spades"), Card("jack", 10, "clubs"), Card("10", 10, "spades")], 21)
+        self.calculate_hand_helper([Card("ace",1,"spades"), Card("jack", 10, "clubs")], 21)
 
-        def check_empty_hand(self):
-            assert(Player("andrew", [])).to_string == "andrew, hand is empty"
+    def calculate_multiple_ace_hands(self):
+        self.calculate_hand_helper([Card("ace",1,"spades"), Card("ace", 1, "clubs"), Card("ace", 1, "hearts")], 13)
+        self.calculate_hand_helper([Card("ace",1,"spades"), Card("ace", 1, "clubs")], 12)
 
-        def check_empty_name(self):
-            assert(Player("andrew", [Card("ace", 1, "spades")])).to_string == ", hand is ace of spades"
+    def calculate_hand_helper(self, hand, expected_value):
+        assert Player("andrew", hand).calculate_hand() == expected_value
 
-        def check_multiple_cards(self):
-            assert(Player("andrew", [Card("ace", 1, "spades"), Card("ace", 1, "clubs"), Card("jack", 10, "diamonds")])).to_string == "andrew, hand is ace of spades, ace of clubs, jack of diamonds"
+    def player_to_string_test(self):
+        self.check_empty_hand()
+        self.check_empty_name()
+        self.check_multiple_cards()
+
+    def check_empty_hand(self):
+        assert(Player("andrew", []).to_string() == "andrew, hand is: empty")
+
+    def check_empty_name(self):
+        assert(Player("andrew", [Card("ace", 1, "spades")]).to_string() == "andrew, hand is: ace of spades")
+
+    def check_multiple_cards(self):
+        assert(Player("andrew", [Card("ace", 1, "spades"), Card("ace", 1, "clubs"), Card("jack", 10, "diamonds")]).to_string() == "andrew, hand is: ace of spades, ace of clubs, jack of diamonds")
 
         
