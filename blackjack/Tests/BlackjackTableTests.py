@@ -15,6 +15,7 @@ class blackjack_table_tests:
         self.get_user_action_test()
         self.get_players_test()
         self.execute_turn_test()
+        print("finished blackjack table tests")
 
     def player_hit_test(self):
         table = BlackjackTable()
