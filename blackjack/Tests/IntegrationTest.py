@@ -9,56 +9,34 @@ from GameModules.BlackjackTable import BlackjackTable
 POTENTIAL_NAMES = ["andrew", "james", "shomik", "max", "jun", "manish", "basheesh", "mm me in melee", "jane doe", "john smith"]
 VALID_ACTIONS = ["h", "s"]
 random.seed(67)
+#note to self seed 68 actually has some useful edge cases, worth also using that seed
 
 class IntegrationTest:
 
     def __init__(self):
-        self.our_input = ""
         self.our_names_arr = []
         self.our_actions_arr = []
         self.table = BlackjackTable()
 
     def run_integration_test(self):
-        #BlackjackTable().game_loop()
-        our_input = self.set_our_input()
-        actual_output = self.get_actual_output()
-        #print(actual_output)
-        expected_output = self.get_expected_output()
-        print(expected_output)
-        i = 0
-        while i < min(len(actual_output), len(expected_output)):
-            if actual_output[i] != expected_output[i]:
-                print(actual_output[i], expected_output[i], i)
-                break
-            i += 1
-        
-        assert actual_output == expected_output
+        self.set_our_input()        
+        assert self.get_actual_output() == self.get_expected_output()
 
 
     def get_expected_output(self):
-        expected_output = ""
-        expected_output += self.add_expected_naming_output()
-        expected_output += self.add_expected_hit_stay_output()
-        expected_output += self.add_get_winners_output()
-        expected_output += "\n"
-        #print(expected_output)
+        expected_output = self.add_expected_naming_output() + self.add_expected_hit_stay_output() + self.add_get_winners_output() + "\n"
         return expected_output
 
 
     def add_expected_naming_output(self):
         expected_out = "enter q to finish adding player names\n"
-        index = 0
-
-        name = self.our_names_arr[0]
-        #print(self.our_names_arr)
         for name in self.our_names_arr:
             expected_out += "enter a name for a player (gg if your name is q): "
-        post_last_name_statement = "enter a name for a player (gg if your name is q): "
-        return expected_out + post_last_name_statement
+        statement_when_quitting = "enter a name for a player (gg if your name is q): "
+        return expected_out + statement_when_quitting
 
     def add_expected_hit_stay_output(self):
         expected_output = ""
-
         action_index = 0
         current_amt_cards = 2
         player_index = 0
@@ -128,25 +106,24 @@ class IntegrationTest:
         return f"here are the winners: {self.table.get_winners(players)}"
             
     def set_our_input(self):
-        our_input = ""
-        actions = []
+        self.initialize_stdin()
+        num_players = self.write_names_to_input()
+        self.write_quit_signal()
+        self.write_actions()
+        self.write_minimum_needed_stay_actions()
 
-        table = BlackjackTable()
-        num_players = random.randrange(3,9)
+    def initialize_stdin(self):
         sys.stdin = StringIO()
-        for i in range(0,num_players):
-            #we're going to add random names to the std input
-            rand_index = random.randint(0,len(POTENTIAL_NAMES))
-            sys.stdin.write(f"{POTENTIAL_NAMES[rand_index]}\n")
-            our_input += f"{POTENTIAL_NAMES[rand_index]}\n"
-            self.our_names_arr.append(POTENTIAL_NAMES[rand_index])
 
-        sys.stdin.write("q\ns\n")
-        our_input += "q\ns\n"
-        #now we add our actions
-#        self.our_input_arr.append("q\n")
-        #self.our_names_arr.append("q\n")
+    def write_quit_signal(self):
+        sys.stdin.write("q\n")
+    
+    def write_guaranteed_stay_action(self):
+        sys.stdin.write("s\n")
         self.our_actions_arr.append("s\n")
+
+    def write_actions(self):
+        self.write_guaranteed_stay_action()
         stay_counter = 1
         for i in range(0, random.randrange(2,9)):
             random_action = VALID_ACTIONS[random.randrange(0,2)]
@@ -154,30 +131,36 @@ class IntegrationTest:
             if random_action == "s":
                 stay_counter += 1
             sys.stdin.write(f"{random_action}\n")
-            our_input += f"{random_action}\n"
             self.our_actions_arr.append(f"{random_action}\n")
 
-        #print("adding stays")
-        while stay_counter < num_players:
-            #print(stay_counter, num_players)
+    def write_minimum_needed_stay_actions(self):
+        stay_counter = 0
+        num_names = len(self.our_names_arr)
+        for action in self.our_actions_arr:
+            if action == "s\n":
+                stay_counter += 1
+        
+        while stay_counter < num_names:
             sys.stdin.write("s\n")
-            our_input += "s\n"
             self.our_actions_arr.append("s\n")
             stay_counter += 1
 
-        self.our_input = our_input
-        
-        
+
+    def write_names_to_input(self):
+        num_players = random.randrange(3,9)
+        for i in range(0,num_players):
+            #we're going to add random names to the std input
+            rand_index = random.randint(0,len(POTENTIAL_NAMES))
+            sys.stdin.write(f"{POTENTIAL_NAMES[rand_index]}\n")
+            self.our_names_arr.append(POTENTIAL_NAMES[rand_index])
+        return num_players
+
 
     def get_actual_output(self):
         output = StringIO()
-        #print("input", self.our_actions_arr, self.our_names_arr)
         sys.stdin.seek(0)
         with redirect_stdout(output):
-        #print(inp)
-#        print("that was inp")
             self.table.game_loop()
-        #print("game output\n", output.getvalue())
         return output.getvalue()
 
 
