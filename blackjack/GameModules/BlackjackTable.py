@@ -111,9 +111,6 @@ class BlackjackTable:
             self.execute_turn(player)
 
         print(f"here are the winners: {self.get_winners(self.players)}")
-        #self.shuffle_deck(self.tableDeck)
-        #then we're going to cycle through the players asking if they want to hit, checking their card value after to see if they bust
-        #then we check each players hand looking for max hand, keeping track of all the players that won
 
 if __name__ == "__main__":
     table = BlackjackTable()
