@@ -2,6 +2,10 @@ from Tests import CardTests
 from Tests import DeckTests
 from Tests import PlayerTests
 from Tests import BlackjackTableTests
+import sys
+from io import StringIO
+from contextlib import redirect_stdout
+
 
 def run_tests():
     card_tests = CardTests.card_tests()
@@ -13,5 +17,5 @@ def run_tests():
     deck_tests.run_all()
     player_tests.run_all()
     blackjack_table_tests.run_all()
-
+    print("finished all tests")
 run_tests()

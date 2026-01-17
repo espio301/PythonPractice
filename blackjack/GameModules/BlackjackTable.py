@@ -74,16 +74,16 @@ class BlackjackTable:
         return True
 
     def get_user_action(self, player):
-        user_input = input(f"{player.name}, please input a h to hit, or s to stay")
+        user_input = input(f"{player.name}, please input a h to hit, or s to stay\n")
         while user_input not in VALID_ACTIONS:
-            user_input = input(f"{player.name}, please input a h to hit, or s to stay")
+            user_input = input(f"{player.name}, please input a h to hit, or s to stay\n")
         return user_input
 
     def execute_turn(self, player):
         hand_val = player.calculate_hand()
 
         if hand_val == 21:
-            print("21!")
+            self.print_max_hand()
             return
         while hand_val < 21:
             action = self.get_user_action(player)
@@ -96,6 +96,9 @@ class BlackjackTable:
                 self.print_hand(player)
                 break
         return
+
+    def output_max_hand(self):
+        print("21!")
 
     def gameLoop(self):
         self.get_players()

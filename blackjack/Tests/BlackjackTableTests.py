@@ -1,4 +1,4 @@
-
+import sys
 from io import StringIO
 from contextlib import redirect_stdout
 from GameModules.Player import Player
@@ -12,7 +12,9 @@ class blackjack_table_tests:
         self.starting_deal_test()
         self.get_winners_test()
         self.print_hit_test()
-        print("finished blackjack table tests")
+        self.get_user_action_test()
+        self.get_players_test()
+        self.execute_turn_test()
 
     def player_hit_test(self):
         table = BlackjackTable()
@@ -69,6 +71,53 @@ class blackjack_table_tests:
             table.print_hit(player) 
         assert output.getvalue() == "badabing badaboom you got a jack of spades\n"
 
+    def get_players_test(self):
+        table = BlackjackTable()
+        self.create_stdin_write("andrew\njames\nq\n")
+        self.silent_run(table.get_players)
+        assert table.players[0].name == "andrew" and table.players[1].name == "james"
+    
+    def execute_turn_test(self):
+        with redirect_stdout(StringIO()):
+            self.check_player_busted_turn()
+            self.check_player_hit_turn()
+            self.check_player_stay_turn()
+
+    def check_player_stay_turn(self):
+        player = Player("andrew", [ Card("10", 10, "spades"), Card("10", 10, "hearts") ])
+        table = BlackjackTable()
+        self.create_stdin_write("s\n")
+        self.silent_run(table.execute_turn, player)
+        assert len(player.hand) == 2
+
+    def check_player_hit_turn(self):
+        player = Player("andrew", [ Card("10", 10, "spades"), Card("10", 10, "hearts") ])
+        table = BlackjackTable()
+        self.create_stdin_write("h\ns\n")
+        self.silent_run(table.execute_turn, player)
+        assert len(player.hand) == 3
+
+    def check_player_busted_turn(self):
+        player = Player("andrew", [Card("10", 10, "diamonds"), Card("10", 10, "spades"), Card("10", 10, "hearts") ])
+        table = BlackjackTable()
+        self.create_stdin_write("h\n")
+        self.silent_run(table.execute_turn, player)
+        assert len(player.hand) == 3
+
+    def get_user_action_test(self):
+        player = Player("andrew", [])
+        table = BlackjackTable()
+        output = StringIO()
+        with redirect_stdout(output):
+            self.create_stdin_write("j\ns\n")
+            table.get_user_action(player)
+        assert output.getvalue() == "andrew, please input a h to hit, or s to stay\nandrew, please input a h to hit, or s to stay\n"
+
+    def create_stdin_write(self, input):
+        sys.stdin = StringIO()
+        sys.stdin.write(input)
+        sys.stdin.seek(0)
+        return sys.stdin
 
     def assign_table_hands_helper(self, table, hand_one, hand_two):
         #not entirely certain how to unbreak law of demeter here but im ngl kinda tired to figure it out and want to try to finish this. this is TODO
@@ -76,6 +125,14 @@ class blackjack_table_tests:
         for i, player in enumerate(table.players):
             player.set_hand(hands_list[i])
         
+    def silent_run(self, function, player = None):
+        output = StringIO()
+        with redirect_stdout(output):
+            if player == None:
+                function()
+            else:
+                function(player)
+        return output
 
     def create_table_two_players(self):
         player_one = Player("a", [])
