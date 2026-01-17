@@ -8,7 +8,7 @@ from GameModules.BlackjackTable import BlackjackTable
 
 POTENTIAL_NAMES = ["andrew", "james", "shomik", "max", "jun", "manish", "basheesh", "mm me in melee", "jane doe", "john smith"]
 VALID_ACTIONS = ["h", "s"]
-random.seed(80)
+random.seed(67)
 
 class IntegrationTest:
 
@@ -24,13 +24,23 @@ class IntegrationTest:
         actual_output = self.get_actual_output()
         #print(actual_output)
         expected_output = self.get_expected_output()
-        print(self.add_expected_hit_stay_output())
-        #assert actual_output == expected_output
+        print(expected_output)
+        i = 0
+        while i < min(len(actual_output), len(expected_output)):
+            if actual_output[i] != expected_output[i]:
+                print(actual_output[i], expected_output[i], i)
+                break
+            i += 1
+        
+        assert actual_output == expected_output
 
 
     def get_expected_output(self):
         expected_output = ""
         expected_output += self.add_expected_naming_output()
+        expected_output += self.add_expected_hit_stay_output()
+        expected_output += self.add_get_winners_output()
+        expected_output += "\n"
         #print(expected_output)
         return expected_output
 
@@ -43,7 +53,8 @@ class IntegrationTest:
         #print(self.our_names_arr)
         for name in self.our_names_arr:
             expected_out += "enter a name for a player (gg if your name is q): "
-        return expected_out
+        post_last_name_statement = "enter a name for a player (gg if your name is q): "
+        return expected_out + post_last_name_statement
 
     def add_expected_hit_stay_output(self):
         expected_output = ""
@@ -61,10 +72,27 @@ class IntegrationTest:
                 expected_output += f"{player_helper.to_string()}\n"
                 is_new_player = False
                 current_amt_cards = 2
+            player_helper = Player("", player.get_hand()[:current_amt_cards])
+            hand_val = player_helper.calculate_hand()
+            if hand_val == 21:
+                expected_output += "21!\n"
+                player_index += 1
+                is_new_player = True
+                continue
+
 
             expected_output += f"{player.name}, please input a h to hit, or s to stay\n"
             action = self.our_actions_arr[action_index]
             #print("this is the current action", action)
+
+            player_helper = Player("", player.get_hand()[:current_amt_cards])
+            hand_val = player_helper.calculate_hand()
+            if hand_val == 21:
+                expected_output += "21!\n"
+                player_index += 1
+                is_new_player = True
+                continue
+
             if action == "s\n":
                 expected_output += f"{player.to_string()}\n"
                 player_index += 1
@@ -74,15 +102,15 @@ class IntegrationTest:
                 current_amt_cards += 1
                 player_hand = player.get_hand()
 
-                #print("printing player")
-                #print(self.our_names_arr, player_index)
-                #print(self.our_actions_arr, action_index)
-                #print(player.to_string(), current_amt_cards)
+                """print("printing player")
+                print(self.our_names_arr, player_index)
+                print(self.our_actions_arr, action_index)
+                print(player.to_string(), current_amt_cards)"""
                 expected_output += f"badabing badaboom you got a {player_hand[current_amt_cards-1].to_string()}\n"
                 player_helper = Player("", player.get_hand()[:current_amt_cards])
                 hand_val = player_helper.calculate_hand()
                 if hand_val > 21:
-                    expected_output += "busted"
+                    expected_output += "busted\n"
                     player_index += 1
                     is_new_player = True
 
@@ -95,6 +123,9 @@ class IntegrationTest:
             
         return expected_output
 
+    def add_get_winners_output(self):
+        players = self.table.players
+        return f"here are the winners: {self.table.get_winners(players)}"
             
     def set_our_input(self):
         our_input = ""
@@ -114,6 +145,7 @@ class IntegrationTest:
         our_input += "q\ns\n"
         #now we add our actions
 #        self.our_input_arr.append("q\n")
+        #self.our_names_arr.append("q\n")
         self.our_actions_arr.append("s\n")
         stay_counter = 1
         for i in range(0, random.randrange(2,9)):

@@ -18,6 +18,7 @@ class BlackjackTable:
     def add_player(self, player: Player):
         self.players.append(player)
 
+    #TODO could be better named
     def get_players(self):
         print("enter q to finish adding player names")
         while True:
@@ -97,7 +98,7 @@ class BlackjackTable:
                 break
         return
 
-    def output_max_hand(self):
+    def print_max_hand(self):
         print("21!")
 
     def game_loop(self):
@@ -109,7 +110,7 @@ class BlackjackTable:
             print(player.to_string())
             self.execute_turn(player)
 
-        print("here are the winners: ", self.get_winners(self.players))
+        print(f"here are the winners: {self.get_winners(self.players)}")
         #self.shuffle_deck(self.tableDeck)
         #then we're going to cycle through the players asking if they want to hit, checking their card value after to see if they bust
         #then we check each players hand looking for max hand, keeping track of all the players that won
