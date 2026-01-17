@@ -6,7 +6,7 @@ from GameModules.Card import Card
 from GameModules.BlackjackTable import BlackjackTable
 
 
-class blackjack_table_tests:
+class BlackjackTableTests:
     def run_all(self):
         self.player_hit_test()
         self.starting_deal_test()
