@@ -35,6 +35,7 @@ class IntegrationTest:
         statement_when_quitting = "enter a name for a player (gg if your name is q): "
         return expected_out + statement_when_quitting
 
+    #it's possible I'm tired, but I think I could use some tips on refactoring something like this. Its similar to a fsm and because it has a few different states to keep track of, seems a bit harder to break down without having some kind of object to hold the state. But idt that should change the readability so much??
     def add_expected_hit_stay_output(self):
         expected_output = ""
         action_index = 0
@@ -45,31 +46,19 @@ class IntegrationTest:
         while player_index < len(self.table.players):
             player = self.table.players[player_index]
             if is_new_player:
-                player_end_state_hand = player.get_hand()
-                player_helper = Player(player.name, [player_end_state_hand[0], player_end_state_hand[1]])
-                expected_output += f"{player_helper.to_string()}\n"
+                expected_output += self.write_expected_for_new_player(player)
                 is_new_player = False
                 current_amt_cards = 2
-            player_helper = Player("", player.get_hand()[:current_amt_cards])
-            hand_val = player_helper.calculate_hand()
+
+            hand_val = self.get_value_of_hand(player, current_amt_cards)
             if hand_val == 21:
                 expected_output += "21!\n"
                 player_index += 1
                 is_new_player = True
                 continue
-
 
             expected_output += f"{player.name}, please input a h to hit, or s to stay\n"
             action = self.our_actions_arr[action_index]
-            #print("this is the current action", action)
-
-            player_helper = Player("", player.get_hand()[:current_amt_cards])
-            hand_val = player_helper.calculate_hand()
-            if hand_val == 21:
-                expected_output += "21!\n"
-                player_index += 1
-                is_new_player = True
-                continue
 
             if action == "s\n":
                 expected_output += f"{player.to_string()}\n"
@@ -78,22 +67,8 @@ class IntegrationTest:
 
             if action == "h\n":
                 current_amt_cards += 1
-                player_hand = player.get_hand()
-
-                """print("printing player")
-                print(self.our_names_arr, player_index)
-                print(self.our_actions_arr, action_index)
-                print(player.to_string(), current_amt_cards)"""
-                expected_output += f"badabing badaboom you got a {player_hand[current_amt_cards-1].to_string()}\n"
-                player_helper = Player("", player.get_hand()[:current_amt_cards])
-                hand_val = player_helper.calculate_hand()
-                if hand_val > 21:
-                    expected_output += "busted\n"
-                    player_index += 1
-                    is_new_player = True
-
-                if hand_val == 21:
-                    expected_output += "21!"
+                expected_output += self.write_expected_hit(player, current_amt_cards)
+                if self.get_value_of_hand(player, current_amt_cards) >= 21:
                     player_index += 1
                     is_new_player = True
 
@@ -101,13 +76,35 @@ class IntegrationTest:
             
         return expected_output
 
+    def write_expected_hit(self, player, current_amt_cards):
+        player_hand = player.get_hand()
+        new_card = player_hand[current_amt_cards-1]
+        expected_output = f"badabing badaboom you got a {new_card.to_string()}\n"
+        hand_val = self.get_value_of_hand(player, current_amt_cards)
+
+        if hand_val == 21:
+            expected_output += "21!\n"
+        if hand_val > 21:
+            expected_output += "busted\n"
+        return expected_output
+
+    def write_expected_for_new_player(self, player):
+        player_end_state_hand = player.get_hand()
+        player_helper = Player(player.name, [player_end_state_hand[0], player_end_state_hand[1]])
+        return f"{player_helper.to_string()}\n"
+
+    def get_value_of_hand(self, player, number_of_cards):
+        player_helper = Player("", player.get_hand()[:number_of_cards])
+        return player_helper.calculate_hand()
+
+
     def add_get_winners_output(self):
         players = self.table.players
         return f"here are the winners: {self.table.get_winners(players)}"
             
     def set_our_input(self):
         self.initialize_stdin()
-        num_players = self.write_names_to_input()
+        self.write_names_to_input()
         self.write_quit_signal()
         self.write_actions()
         self.write_minimum_needed_stay_actions()
@@ -162,9 +159,3 @@ class IntegrationTest:
         with redirect_stdout(output):
             self.table.game_loop()
         return output.getvalue()
-
-
-
-        #create 3-8 players randomly
-        #have 1 person stay, then all others randomly hit 1-5 times (or until the bust of course)
-        #assert the printed winners output print is correct
