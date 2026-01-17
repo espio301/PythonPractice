@@ -90,7 +90,7 @@ class BlackjackTable:
             if action == "h":
                 self.player_hit(player)
                 self.print_hit(player)
-
+                hand_val = player.calculate_hand()
             if action == "s":
                 self.player_stay(player)
                 self.print_hand(player)
@@ -100,7 +100,7 @@ class BlackjackTable:
     def output_max_hand(self):
         print("21!")
 
-    def gameLoop(self):
+    def game_loop(self):
         self.get_players()
         self.shuffle_deck(self.table_deck)
         self.starting_deal()
@@ -116,5 +116,5 @@ class BlackjackTable:
 
 if __name__ == "__main__":
     table = BlackjackTable()
-    table.gameLoop()
+    table.game_loop()
 
