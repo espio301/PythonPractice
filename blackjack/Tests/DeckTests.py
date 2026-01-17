@@ -5,7 +5,7 @@ import random
 
 random.seed(67)
 
-class deck_tests:
+class DeckTests:
 
     def run_all(self):
         self.deck_init_test()

@@ -2,7 +2,7 @@ from GameModules.Player import Player
 from GameModules.Card import Card
 
 
-class player_tests:
+class PlayerTests:
     def run_all(self):
         self.player_did_bust_test()
         self.calculate_hand_test()
