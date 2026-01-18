@@ -14,5 +14,8 @@ class Piece():
     def get_coords(self):
         return self.coordinates
 
+    def get_color(self):
+        return self.color
+        
     def move(self):
         pass
