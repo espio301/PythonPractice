@@ -11,3 +11,6 @@ class Rook(Piece):
 
     def to_string(self):
         return super().to_string()
+
+    def get_color(self):
+        return super().get_color()
