@@ -1,8 +1,8 @@
 from PieceModules.Piece import Piece
-class Pawn(Piece):
+class King(Piece):
     def __init__(self, color : str, coordinates):
         super().__init__(color, coordinates)
-        self.name = "pawn"
+        self.name="King"
 
     def get_coords(self):
         return super().get_coords()
