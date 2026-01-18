@@ -3,6 +3,7 @@ class Pawn(Piece):
     def __init__(self, color : str, coordinates):
         super().__init__(color, coordinates)
         self.name = "pawn"
+        self.has_moved = False
 
     def get_coords(self):
         return super().get_coords()
@@ -15,3 +16,7 @@ class Pawn(Piece):
 
     def get_color(self):
         return super().get_color()
+
+    def is_valid_move(self, coord):
+        pass
+        
