@@ -20,12 +20,9 @@ class ChessBoard():
             self.board.append([0,0,0,0,0,0,0,0])
         self.board.append(self.create_pawn_row("white"))
         self.board.append(self.create_initial_king_row("white"))
-        print(self.to_string())
 
     def is_open_tile(self, coordinates):
-        print("here")
-        print(coordinates)
-        print(coordinates[0])
+        print(self.to_string())
         return self.board[coordinates[0]][coordinates[1]] == 0
 
     def to_string(self):
@@ -34,7 +31,6 @@ class ChessBoard():
             column_entries = [] 
             for column in range(LEN_SIDE):
                 if not self.is_open_tile([row,column]):
-                    print("THIS IS WHAT WE HAVE AT THE COORD, ", self.board[row][column] )
                     column_entries.append(self.board[row][column].to_string())
                 else:
                     column_entries.append("--")
@@ -64,6 +60,56 @@ class ChessBoard():
         return initialized_row
 
 
-ChessBoard().init_board()
-    
+    def validate_start_point_piece(self):
+        pass
+    def move_piece(self, start_coord, end_coord):
+        
+        piece = self.board[start_coord]
+    def get_user_action(self):
+        piece_origin = input("where is the piece you'd like to move")
+        pience_endpoint = input("where do you want to move it to")
+
+
+    #TODO
+    def game_is_won(self):
+        return False
+
+
+
+    def get_sanitized_coords(self):
+        user_in = input("coords to move from: ")
+        while len(user_in) != 3 and user_in[0].isdigit() and user_in[1] == "," and user_in[1].isdigit():
+            user_in = input("coords to move from: ")
+        return self.convert_input_to_coords(user_in)
+
+    def convert_input_to_coords(self, user_in):
+        coords = []
+        split_input = user_in.split(",")
+        for el in split_input:
+            coords.append(int(el))
+        return coords
+
+    def get_user_piece_to_move(self, color):
+        coords = self.get_sanitized_coords()
+        print(coords)
+        print(self.is_open_tile(coords))
+        while not self.is_open_tile(coords) or self.board[coords[0]][coords[1]].get_color() != color: #check if the piece is of our color and is a piece
+            coords = self.get_sanitized_coords()
+        return coords
+
+    def game_loop(self):
+        players = ["white", "black"]
+        turn_count = 0
+        print("please enter coordinates in the form row,column")
+        while not self.game_is_won():
+            color_to_move = players[turn_count%2]
+            print(f"{color_to_move} to move")
+            coords_to_move = self.get_user_piece_to_move(color_to_move)
+            print(coords_to_move)
+            turn_count += 1
+
+board = ChessBoard()
+print(board.to_string())
+
+
 
