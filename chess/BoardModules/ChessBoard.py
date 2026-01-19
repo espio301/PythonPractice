@@ -4,10 +4,11 @@ from PieceModules.Knight import Knight
 from PieceModules.Bishop import Bishop
 from PieceModules.Queen import Queen
 from PieceModules.King import King
+#TODO would take too much time right now, but would've been nice to do a get_tile function with [r,c]
 
 LEN_SIDE = 8
 OPPOSITE_COLOR = {"white":"black", "black":"white"}
-
+PIECES_DISREGARD_COLLISIONS = ["knight"]
 class ChessBoard():
     def __init__(self):
         self.board = self.create_initial_board()
@@ -99,20 +100,45 @@ class ChessBoard():
             coords = self.get_sanitized_coords()
         return coords
 
-    def is_valid_move(self, origin, end):
+    def is_valid_movement(self, origin, end):
         origin_piece = self.board[origin[0]][origin[1]]
         origin_color = origin_piece.get_color()
         end_tile = self.board[end[0]][end[1]]
-        print("is_valid_move_pattern", origin_piece.is_valid_move_pattern(end))
+        #print("is_valid_move_pattern", origin_piece.is_valid_move_pattern(end))
         if self.coord_is_piece_and_is_color(end, origin_color) or not origin_piece.is_valid_move_pattern(end):
             return False
         return True
 
+    def is_piece_in_the_way(self, origin, destination):
+        direction = self.get_step_direction(origin, destination)
+        piece = self.board[origin[0]][origin[1]]
+        if piece.get_name() in PIECES_DISREGARD_COLLISIONS:
+            return True
+        cur_coords = [origin[0] + direction[0], origin[1] + direction[1]]
+        print(cur_coords)
+        while cur_coords != destination:
+            print("looking at:", self.board[cur_coords[0]][cur_coords[1]])
+            if self.board[cur_coords[0]][cur_coords[1]] != 0:
+                return True
+            cur_coords = [cur_coords[0] + direction[0], cur_coords[1] + direction[1]]
+        return False
+
+    def get_step_direction(self, origin, destination):
+        step_delta = []
+        for i in range(2):
+            delta = destination[i] - origin[i]
+            if delta == 0:
+                step_delta.append(0)
+            else:
+                step_delta.append(int(delta/abs(delta)))
+        return step_delta
+        
 
     def get_user_move_to_coords(self, origin):
         print("coords to move to:")
         destination = self.get_sanitized_coords()
-        while not self.is_valid_move(origin, destination):
+        print("hello:",self.is_piece_in_the_way(origin, destination))
+        while not self.is_valid_movement(origin, destination) or self.is_piece_in_the_way(origin, destination):
             print("coords to move to:")
             destination = self.get_sanitized_coords()
         return destination
