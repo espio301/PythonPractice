@@ -27,9 +27,9 @@ class Pawn(Piece):
     def get_color(self):
         return super().get_color()
 
-    def get_move_patterns(self):
-        super().get_move_patterns()
-            
+    def get_exception_patterns(self):
+        return [[1,1], [-1,-1], [1,-1], [-1,1]]
+
     def invert_move_patterns(self):
         for delta_index in range(len(self.move_patterns)):
             for i in range(2):

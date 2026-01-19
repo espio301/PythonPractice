@@ -15,6 +15,9 @@ class Piece():
     def get_coords(self):
         return self.coordinates
 
+    def get_name(self):
+        return self.name
+
     def get_color(self):
         return self.color
 
@@ -25,8 +28,6 @@ class Piece():
         movement_delta = []
         for i in range(2):
             movement_delta.append(destination[i] - self.coordinates[i])
-        print("checking if is valid:",movement_delta, self.move_patterns)
-        print("our if statement", movement_delta in self.move_patterns)
         if movement_delta in self.move_patterns:
             return True
         return False
