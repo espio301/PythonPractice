@@ -64,7 +64,6 @@ class ChessBoard():
     def coord_is_piece_and_is_color(self, coords, color):
         if self.is_open_tile(coords):
             return False
-        print("this:" ,self.board[coords[0]][coords[1]].get_color() == color)
         return self.board[coords[0]][coords[1]].get_color() == color
 
     #TODO
@@ -104,7 +103,8 @@ class ChessBoard():
         origin_piece = self.board[origin[0]][origin[1]]
         origin_color = origin_piece.get_color()
         end_tile = self.board[end[0]][end[1]]
-        if self.coord_is_piece_and_is_color(end, origin_color):
+        print("is_valid_move_pattern", origin_piece.is_valid_move_pattern(end))
+        if self.coord_is_piece_and_is_color(end, origin_color) or not origin_piece.is_valid_move_pattern(end):
             return False
         return True
 
@@ -115,7 +115,15 @@ class ChessBoard():
         while not self.is_valid_move(origin, destination):
             print("coords to move to:")
             destination = self.get_sanitized_coords()
+        return destination
         print("here")
+
+    def move(self, move_from_coords, move_to_coords):
+        piece = self.board[move_from_coords[0]][move_to_coords[1]]
+        piece.set_coords(move_to_coords)
+        self.board[move_to_coords[0]][move_to_coords[1]] = piece
+        self.board[move_from_coords[0]][move_from_coords[1]] = 0
+
 
 
     def game_loop(self):
@@ -128,6 +136,7 @@ class ChessBoard():
             print(f"{color_to_move} to move")
             move_from_coords = self.get_user_piece_to_move(color_to_move)
             move_to_coords = self.get_user_move_to_coords(move_from_coords)
+            self.move(move_from_coords, move_to_coords)
             print("turn_count",turn_count)
             turn_count += 1
 
