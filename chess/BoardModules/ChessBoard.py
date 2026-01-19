@@ -21,10 +21,10 @@ class ChessBoard():
     def __init__(self):
         self.board = self.create_initial_board()
         self.turn_count = 0
+        self.game_is_over = False
 
 
     def create_initial_board(self):
-        print("initializing")
         board = []
         board.append(self.create_initial_king_row("black"))
         board.append(self.create_pawn_row("black"))
@@ -100,7 +100,6 @@ class ChessBoard():
     def get_user_piece_to_move(self, color):
         print("coords to move from: ")
         coords = self.get_sanitized_coords()
-        print(self.is_moving_non_king_in_check(color,coords))
         while self.coord_is_piece_and_is_color(coords, OPPOSITE_COLOR[color]) or self.board[coords[0]][coords[1]] == 0 or self.is_moving_non_king_in_check(color,coords):
             print("coords to move from: ")
             coords = self.get_sanitized_coords()
@@ -159,16 +158,10 @@ class ChessBoard():
         return destination
 
     def move(self, move_from_coords, move_to_coords):
-        print("in move function")
-        print(self.board[move_from_coords[0]][move_from_coords[1]])
         piece = self.board[move_from_coords[0]][move_from_coords[1]]
-        print(piece.to_string(),piece)
         piece.set_coords(move_to_coords)
-        print(piece.to_string(), piece)
         self.board[move_to_coords[0]][move_to_coords[1]] = piece
-        print(piece.to_string(), piece)
         self.board[move_from_coords[0]][move_from_coords[1]] = 0
-        print(piece.to_string(), piece)
 
 
     def get_delta_two_points(self, origin, end):
@@ -179,8 +172,6 @@ class ChessBoard():
         return delta
 
     def is_color_in_checkmate(self, color):
-        print(f"checking if {color} is in check", self.is_color_in_check(color))
-        print(f"checking if king of {color} is not moveable", not self.is_king_of_color_moveable(color))
         if self.is_color_in_check(color) and not self.is_king_of_color_moveable(color):
             return True
         #we could probably add stalemate mechanics here if we decide to (should do it but I'm running out of time)
@@ -191,7 +182,7 @@ class ChessBoard():
         king = self.board[king_coords[0]][king_coords[1]]
         potential_moves = self.get_potential_moves(king)
         for potential_move in potential_moves:
-            if not self.is_coord_attacked_by_color(potential_move, OPPOSITE_COLOR[color]) and isinstance(self.board[potential_move[0]][potential_move[1]], Piece):
+            if not self.is_coord_attacked_by_color(potential_move, OPPOSITE_COLOR[color]) and not isinstance(self.board[potential_move[0]][potential_move[1]], Piece):
                 return True
         return False
 
@@ -259,13 +250,15 @@ class ChessBoard():
     def check_and_execute_win_state(self):
         if self.is_color_in_checkmate("white"):
             print("black wins!")
+            self.game_is_over = True
         if self.is_color_in_checkmate("black"):
             print("white wins!")
+            self.game_is_over = True
 
     def game_loop(self):
         players = ["white", "black"]
         print("please enter coordinates in the form row,column")
-        while True:
+        while not self.game_is_over:
             print("starting turn")
             print(self.to_string())
             color_to_move = players[self.turn_count%2]
