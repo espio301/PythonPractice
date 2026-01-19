@@ -16,7 +16,3 @@ class Queen(Piece):
             self.move_patterns.append(i)
         for i in rook_patterns:
             self.move_patterns.append(i)
-
-    def get_coords(self):
-        return super().get_coords()
-
