@@ -259,19 +259,16 @@ class ChessBoard():
         players = ["white", "black"]
         print("please enter coordinates in the form row,column")
         while not self.game_is_over:
-            print("starting turn")
             print(self.to_string())
             color_to_move = players[self.turn_count%2]
             print(f"{color_to_move} to move")
             move_from_coords = self.get_user_piece_to_move(color_to_move)
             move_to_coords = self.get_user_move_to_coords(move_from_coords)
-            print(self.board[move_from_coords[0]][move_from_coords[1]])
             self.move(move_from_coords, move_to_coords)
             print("turn_count",self.turn_count)
             self.check_and_execute_win_state()
             self.turn_count += 1
 
-
-board = ChessBoard()
-print(board.board[0][0].get_color())
-board.game_loop()
+if __name__ == "__main__":
+    board = ChessBoard()
+    board.game_loop()
