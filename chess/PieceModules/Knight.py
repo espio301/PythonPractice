@@ -24,8 +24,3 @@ class Knight(Piece):
     def get_move_patterns(self):
         super().get_move_patterns()
 
-    #def is_valid_move_pattern(self, destination):
-    #    super().is_valid_move_pattern(destination)
-
-    def is_valid_move_pattern(self, destination):
-        super().is_valid_move_pattern(destination)

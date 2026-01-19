@@ -29,15 +29,7 @@ class Pawn(Piece):
 
     def get_move_patterns(self):
         super().get_move_patterns()
-
-    def is_valid_move_pattern(self, destination):
-        movement_delta = []
-        for i in range(2):
-            movement_delta.append(destination[i] - self.coordinates[i])
-        if movement_delta in self.move_patterns:
-            return True
-        return False
-    
+            
     def invert_move_patterns(self):
         for delta_index in range(len(self.move_patterns)):
             for i in range(2):
