@@ -12,7 +12,7 @@ class Pawn(Piece):
         return super().get_coords()
 
     def set_coords(self, coords):
-        self.coords = coords
+        self.coordinates = coords
         self.remove_pawn_ummoved_pattern()
     
     def remove_pawn_ummoved_pattern(self):
@@ -26,6 +26,9 @@ class Pawn(Piece):
 
     def get_color(self):
         return super().get_color()
+
+    def get_move_patterns(self):
+        super().get_move_patterns()
 
     def is_valid_move_pattern(self, destination):
         movement_delta = []

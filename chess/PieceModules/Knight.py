@@ -3,6 +3,11 @@ class Knight(Piece):
     def __init__(self, color : str, coordinates):
         super().__init__(color, coordinates)
         self.name = "knight"
+        self.move_patterns = []
+        self.set_knight_move_patterns()
+
+    def set_knight_move_patterns(self):
+        self.move_patterns = [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]]
 
     def get_coords(self):
         return super().get_coords()
@@ -15,3 +20,12 @@ class Knight(Piece):
 
     def get_color(self):
         return super().get_color()
+
+    def get_move_patterns(self):
+        super().get_move_patterns()
+
+    #def is_valid_move_pattern(self, destination):
+    #    super().is_valid_move_pattern(destination)
+
+    def is_valid_move_pattern(self, destination):
+        super().is_valid_move_pattern(destination)
