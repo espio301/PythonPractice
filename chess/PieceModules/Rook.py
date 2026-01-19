@@ -15,9 +15,6 @@ class Rook(Piece):
         print(self.move_patterns)
         print("bye")
 
-    #def get_coords(self):
-    #    return super().get_coords()
-
     def set_coords(self, coords):
         super().set_coords(coords)
 
@@ -26,9 +23,3 @@ class Rook(Piece):
 
     def get_color(self):
         return super().get_color()
-
-    #def get_move_patterns(self):
-    #    return super().get_move_patterns()
-
-    def is_valid_move_pattern(self, destination):
-        super().is_valid_move_pattern(destination)

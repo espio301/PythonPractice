@@ -24,5 +24,3 @@ class King(Piece):
     def get_color(self):
         return super().get_color()
 
-    def is_valid_move_pattern(self, destination):
-        super().is_valid_move_pattern(destination)
