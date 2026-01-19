@@ -104,7 +104,6 @@ class ChessBoard():
     def is_valid_movement(self, origin, end):
         origin_piece = self.board[origin[0]][origin[1]]
         origin_color = origin_piece.get_color()
-        print("exception:",self.is_banned_pawn_exception(origin, end))
         if self.coord_is_piece_and_is_color(end, origin_color) or not origin_piece.is_valid_move_pattern(end) or self.is_banned_pawn_exception(origin,end):
             return False
         return True
@@ -113,8 +112,13 @@ class ChessBoard():
     def is_banned_pawn_exception(self, origin, end): #returns true if is an allowable exception, false otherwise
         delta = self.get_delta_two_points(origin, end)
         piece = self.board[origin[0]][origin[1]]
-        if isinstance(piece, Pawn) and delta in piece.get_exception_patterns() and not self.coord_is_piece_and_is_color(end, OPPOSITE_COLOR[piece.get_color()]):
+        if not isinstance(piece, Pawn):
+            return False
+        if delta in piece.get_exception_patterns() and not self.coord_is_piece_and_is_color(end, OPPOSITE_COLOR[piece.get_color()]):
             return True
+        if delta in [[1,0],[-1,0]] and self.board[end[0]][end[1]] != 0:
+            return True
+
         return False
 
 
@@ -124,7 +128,6 @@ class ChessBoard():
         if piece.get_name() in PIECES_DISREGARD_COLLISIONS:
             return True
         cur_coords = [origin[0] + direction[0], origin[1] + direction[1]]
-        print(cur_coords)
         while cur_coords != destination:
             if self.board[cur_coords[0]][cur_coords[1]] != 0:
                 return True
@@ -141,11 +144,9 @@ class ChessBoard():
                 step_delta.append(int(delta/abs(delta)))
         return step_delta
         
-
     def get_user_move_to_coords(self, origin):
         print("coords to move to:")
         destination = self.get_sanitized_coords()
-        print("hello:",self.is_piece_in_the_way(origin, destination))
         while not self.is_valid_movement(origin, destination) or self.is_piece_in_the_way(origin, destination):
             print("coords to move to:")
             destination = self.get_sanitized_coords()
@@ -158,15 +159,14 @@ class ChessBoard():
         self.board[move_to_coords[0]][move_to_coords[1]] = piece
         self.board[move_from_coords[0]][move_from_coords[1]] = 0
 
-
-
-
     def get_delta_two_points(self, origin, end):
         delta = []
         for i in range(2):
             coord_delta = end[i] - origin[i]
             delta.append(coord_delta)
         return delta
+
+    def check_detected(self)
 
     def game_loop(self):
         players = ["white", "black"]
