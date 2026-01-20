@@ -21,6 +21,7 @@ class ChessBoardTests:
         self.coord_is_piece_and_is_color_test()
         self.convert_input_to_coords_test()
         self.get_sanitized_coords_test()
+        self.get_user_piece_to_move_test()
         print("finished with ChessBoard tests")
 
     def assert_first_last_row_correctness(self):
@@ -30,6 +31,20 @@ class ChessBoardTests:
             black_piece = chessboard[0][i]
             white_piece = chessboard[7][i]
             assert isinstance(black_piece, row_pieces[i]) and isinstance(white_piece, row_pieces[i]) and black_piece.get_color() == "black" and white_piece.get_color()
+
+
+    def create_board_white_in_check(self):
+        chessboard = ChessBoard()
+        chessboard.board = [[Rook("black", [0,0]),0,0,0,0,0,0,0],\
+                            [0,0,0,0,0,0,0,0],\
+                            [0,0,0,0,0,0,0,0],\
+                            [0,0,0,0,0,0,0,0],\
+                            [0,0,0,0,0,0,0,0],\
+                            [0,0,0,0,0,0,0,0],\
+                            [0,0,0,0,0,0,0,0],\
+                            [King("white", [7,0]),0,0,0,0,0,0,Rook("black",[0,0])]]
+        return chessboard
+                            
 
     def assert_pawn_rows_correctness(self):
         chessboard = ChessBoard().board
@@ -87,3 +102,31 @@ wr | wk | wb | wQ | wK | wb | wk | wr"""
         sys.stdin = StringIO()
         sys.stdin.write(write_string)
         sys.stdin.seek(0)
+
+    def get_user_piece_to_move_test(self):
+        self.check_correct_piece_to_move()
+        self.check_user_moves_not_a_piece()
+        self.check_user_moves_other_player_piece()
+        self.check_user_tries_moving_in_check()
+        
+    def check_correct_piece_to_move(self):
+        self.write_seek_new_stdin("0,0\n")
+        blacks_move = ChessBoard().get_user_piece_to_move("black")
+        self.write_seek_new_stdin("7,7\n")
+        white_move = ChessBoard().get_user_piece_to_move("white")
+        assert white_move == [7,7] and blacks_move == [0,0]
+
+    def check_user_moves_not_a_piece(self):
+        self.write_seek_new_stdin("4,4\n0,0\n")
+        incorret_move_first = ChessBoard().get_user_piece_to_move("black")
+        assert incorret_move_first == [0,0]
+
+    def check_user_moves_other_player_piece(self):
+        self.write_seek_new_stdin("7,7\n0,0\n")
+        incorret_move_first = ChessBoard().get_user_piece_to_move("black")
+        assert incorret_move_first == [0,0]
+    
+    def check_user_tries_moving_in_check(self):
+        chessboard = self.create_board_white_in_check()
+        self.write_seek_new_stdin("7,7\n7,0\n")
+        assert chessboard.get_user_piece_to_move("white") == [7,0]
