@@ -25,6 +25,9 @@ class ChessBoardTests:
         self.get_user_piece_to_move_test()
         self.is_moving_non_king_in_check_test()
         self.is_valid_movement_test()
+        self.is_piece_in_the_way_test()
+        self.get_step_direction_test()
+        self.get_user_move_to_coords_test()
         print("finished with ChessBoard tests")
 
     def assert_first_last_row_correctness(self):
@@ -60,6 +63,19 @@ class ChessBoardTests:
                             [0,0,0,0,0,0,0,0]]
         return chessboard
 
+    def create_pawn_in_way_of_rook(self):
+        chessboard = ChessBoard()
+        chessboard.board = [[0,0,0,0,0,0,0,0],\
+                            [0,0,0,0,0,0,0,0],\
+                            [0,0,0,0,0,0,0,0],\
+                            [0,Pawn("black", [3,1]),0,0,0,0,0,0],\
+                            [Pawn("white",[4,0]),0,0,0,0,0,0,0],\
+                            [0,0,0,0,0,0,0,0],\
+                            [0,0,0,0,0,0,0,0],\
+                            [Rook("white",[7,0]),0,0,0,0,0,0,0]]
+        return chessboard
+
+
     def write_seek_new_stdin(self, write_string):
         sys.stdin = StringIO()
         sys.stdin.write(write_string)
@@ -67,11 +83,13 @@ class ChessBoardTests:
 
     def silent_run(self, func, func_in = None):
         output = StringIO()
+        func_output = None
         with redirect_stdout(output):
             if func_in != None:
-                func(func_in)
-            func()
-        return output
+                func_output = func(func_in)
+            else:
+                func_output = func()
+        return func_output
 
 
 
@@ -184,5 +202,37 @@ wr | wk | wb | wQ | wK | wb | wk | wr"""
 
     def test_invalid_diag_pawn_movement(self):
         assert ChessBoard().is_valid_movement([6,0],[5,1]) == False
+
+    def is_piece_in_the_way_test(self):
+        piece_is_in_the_way = ChessBoard().is_piece_in_the_way([7,0],[4,0])
+        piece_isnt_in_the_way = ChessBoard().is_piece_in_the_way([6,0], [4,0])
+        assert piece_is_in_the_way == True and piece_isnt_in_the_way == False
+
+    def get_step_direction_test(self):
+        diagonal_step_works = ChessBoard().get_step_direction([0,0], [1,1]) == [1,1]
+        negative_step_works = ChessBoard().get_step_direction([3,3], [2,3]) == [-1,0]
+        assert diagonal_step_works and negative_step_works
+
+    def get_user_move_to_coords_test(self):
+        self.assert_valid_user_move_to_check()
+        self.assert_in_the_way_user_move_to_check()
+        self.assert_invalid_user_move_to_check()
+
+    def assert_valid_user_move_to_check(self):
+        self.write_seek_new_stdin("5,0\n")
+        assert self.silent_run(ChessBoard().get_user_move_to_coords, [6,0]) == [5,0]
+
+    def assert_in_the_way_user_move_to_check(self):
+        self.write_seek_new_stdin("0,0\n6,0\n")
+        chessboard = self.create_pawn_in_way_of_rook()
+        assert self.silent_run(chessboard.get_user_move_to_coords, [7,0]) == [6,0]
+
+    def assert_invalid_user_move_to_check(self):
+        self.write_seek_new_stdin("6,1\n6,0\n")
+        chessboard = self.create_pawn_in_way_of_rook()
+        assert self.silent_run(chessboard.get_user_move_to_coords, [7,0]) == [6,0]
+
+
+
 
 
