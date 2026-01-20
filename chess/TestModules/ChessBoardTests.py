@@ -5,7 +5,8 @@ from PieceModules.Bishop import Bishop
 from PieceModules.Queen import Queen
 from PieceModules.King import King
 from PieceModules.Pawn import Pawn
-
+from io import StringIO
+import sys
 
 class ChessBoardTests:
     def run_all(self):
@@ -18,6 +19,8 @@ class ChessBoardTests:
         self.is_open_tile_test()
         self.to_string_test()
         self.coord_is_piece_and_is_color_test()
+        self.convert_input_to_coords_test()
+        self.get_sanitized_coords_test()
         print("finished with ChessBoard tests")
 
     def assert_first_last_row_correctness(self):
@@ -62,3 +65,25 @@ wr | wk | wb | wQ | wK | wb | wk | wr"""
         correct_colored_coords_give_true = ChessBoard().coord_is_piece_and_is_color([0,0], "black") and ChessBoard().coord_is_piece_and_is_color([7,7], "white")
         is_piece_incorrect_color_gives_false = ChessBoard().coord_is_piece_and_is_color([0,0],"white") == False and ChessBoard().coord_is_piece_and_is_color([7,7],"black") == False
         assert empty_coords_give_false and correct_colored_coords_give_true and is_piece_incorrect_color_gives_false
+
+    def convert_input_to_coords_test(self):
+        assert ChessBoard().convert_input_to_coords("6,7") == [6,7]
+
+    def get_sanitized_coords_test(self):
+        self.test_correct_coords()
+        self.assert_given_coords_not_sanitizable(",")
+        self.assert_given_coords_not_sanitizable("j,k")
+        self.assert_given_coords_not_sanitizable("00,1")
+
+    def test_correct_coords(self):
+        self.write_seek_new_stdin("6,7\n")
+        assert ChessBoard().get_sanitized_coords() == [6,7]
+
+    def assert_given_coords_not_sanitizable(self, unsanitizable_string):
+        self.write_seek_new_stdin(f"{unsanitizable_string}\n6,7\n")
+        assert ChessBoard().get_sanitized_coords() == [6,7]
+
+    def write_seek_new_stdin(self, write_string):
+        sys.stdin = StringIO()
+        sys.stdin.write(write_string)
+        sys.stdin.seek(0)
