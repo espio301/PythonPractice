@@ -28,6 +28,9 @@ class ChessBoardTests:
         self.is_piece_in_the_way_test()
         self.get_step_direction_test()
         self.get_user_move_to_coords_test()
+        self.move_test()
+        self.get_delta_two_points_test()
+        self.is_color_in_checkmate_test()
         print("finished with ChessBoard tests")
 
     def assert_first_last_row_correctness(self):
@@ -74,6 +77,19 @@ class ChessBoardTests:
                             [0,0,0,0,0,0,0,0],\
                             [Rook("white",[7,0]),0,0,0,0,0,0,0]]
         return chessboard
+
+    def create_board_white_in_checkmate(self):
+        chessboard = ChessBoard()
+        chessboard.board = [[King("black",[0,0]),0,0,0,0,0,0,0],\
+                            [0,0,0,0,0,0,0,0],\
+                            [0,0,0,0,0,0,0,0],\
+                            [0,Pawn("black", [3,1]),0,0,0,0,0,0],\
+                            [Pawn("white",[4,0]),0,0,0,0,0,0,0],\
+                            [0,0,0,0,0,0,0,0],\
+                            [Pawn("white",[6,0]),Pawn("white",[6,1]),0,0,0,0,0,0],\
+                            [King("white",[7,0]),0,0,0,0,0,0,Rook("black",[7,7])]]
+        return chessboard
+
 
 
     def write_seek_new_stdin(self, write_string):
@@ -232,6 +248,19 @@ wr | wk | wb | wQ | wK | wb | wk | wr"""
         chessboard = self.create_pawn_in_way_of_rook()
         assert self.silent_run(chessboard.get_user_move_to_coords, [7,0]) == [6,0]
 
+    def move_test(self):
+        chessboard = ChessBoard()
+        chessboard.move([6,0],[5,0])
+        assert chessboard.board[6][0] == 0 and isinstance(chessboard.board[5][0], Pawn)
+    
+    def get_delta_two_points_test(self):
+        assert ChessBoard().get_delta_two_points([2,1],[3,3]) == [1,2]
+
+    def is_color_in_checkmate_test(self):
+        check_but_not_checkmate_result = self.create_board_white_in_check().is_color_in_checkmate("white")
+        neither_check_nor_checkmate = ChessBoard().is_color_in_checkmate("white")
+        white_in_checkmate = self.create_board_white_in_checkmate().is_color_in_checkmate("white")
+        assert neither_check_nor_checkmate == False and check_but_not_checkmate_result == False and white_in_checkmate == True
 
 
 
