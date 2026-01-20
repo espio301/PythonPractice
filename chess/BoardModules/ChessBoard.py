@@ -181,7 +181,7 @@ class ChessBoard():
     def is_king_of_color_moveable(self, color):
         king_coords = self.get_king_of_color_coords(color)
         king = self.board[king_coords[0]][king_coords[1]]
-        potential_moves = self.get_potential_moves(king)
+        potential_moves = self.get_king_potential_moves(king)
         for potential_move in potential_moves:
             if not self.is_coord_attacked_by_color(potential_move, OPPOSITE_COLOR[color]) and not isinstance(self.board[potential_move[0]][potential_move[1]], Piece):
                 return True
@@ -194,7 +194,8 @@ class ChessBoard():
                 return True
         return False
 
-    def get_potential_moves(self, piece):
+    #need to think of a better name or refactor this. it returns the moves that are not out of bounds. it WILL include moves that are attacked by enemy or are spots already taken.
+    def get_king_potential_moves(self, piece):
         move_patterns = piece.get_move_patterns()
         potential_moves = []
         illegal_moves = []
@@ -227,7 +228,7 @@ class ChessBoard():
 
     def piece_can_take_coord(self, piece, coord):
         piece_can_attack_coords = self.get_attacked_coords(piece)
-        if not coord in piece_can_attack_coords:
+        if coord not in piece_can_attack_coords:
             return False
         if self.is_piece_in_the_way(piece.get_coords(), coord):
             return False
@@ -245,6 +246,10 @@ class ChessBoard():
         attacked_coords = []
         piece_coords = piece.get_coords()
         for pattern in move_patterns:
+            row = piece_coords[0]+pattern[0]
+            col = piece_coords[1]+pattern[1]
+            if row < 0 or col < 0 or row >= LEN_SIDE or col >= LEN_SIDE:
+                continue
             attacked_coords.append([piece_coords[0]+pattern[0],piece_coords[1]+pattern[1]])
         return attacked_coords
 
