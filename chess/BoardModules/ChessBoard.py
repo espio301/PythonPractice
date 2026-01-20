@@ -11,6 +11,8 @@ from PieceModules.Piece import Piece
 #TODO I'm not going to worry about stalemate rules at the moment
 #checkmate has a lot of rules, I sort of wonder if its deserving to be a different class for readability or if theres something better to help this. maybe a board class and a game_loop/game_mechanics class would've made this more readable
 #TODO have to make it impossible to move yourself into check
+#TODO Castling
+#TODO it should be ok to move another piece than the king if it puts the king out of check
 #fastest check mate is 6,5 5,5  1,4 3,4     6,6 4,6     0,3 4,7
 
 LEN_SIDE = 8
@@ -114,7 +116,6 @@ class ChessBoard():
         if self.coord_is_piece_and_is_color(end, origin_color) or not origin_piece.is_valid_move_pattern(end) or self.is_banned_pawn_exception(origin,end):
             return False
         return True
-
 
     def is_banned_pawn_exception(self, origin, end): #returns true if is an allowable exception, false otherwise
         delta = self.get_delta_two_points(origin, end)
