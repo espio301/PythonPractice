@@ -52,68 +52,17 @@ class ChessBoardTests:
             white_piece = chessboard[7][i]
             assert isinstance(black_piece, row_pieces[i]) and isinstance(white_piece, row_pieces[i]) and black_piece.get_color() == "black" and white_piece.get_color()
 
-#TODO eventually I'm going to refactor this into TestHelper. After I make the chess letter/coord converter I'll make a board creator helper with all of these. given list of pieces, creates a board with said piece on that board
     def create_board_white_in_check(self):
-        chessboard = ChessBoard()
-        chessboard.board = [[Rook("black", [0,0]),0,0,0,0,0,0,0],\
-                            [0,0,0,0,0,0,0,0],\
-                            [0,0,0,0,0,0,0,0],\
-                            [0,0,0,0,0,0,0,0],\
-                            [0,0,0,0,0,0,0,0],\
-                            [0,0,0,0,0,0,0,0],\
-                            [0,0,0,0,0,0,0,0],\
-                            [King("white", [7,0]),0,0,0,0,0,0,Rook("black",[0,0])]]
-        return chessboard
+        return TestHelpers().create_board_from_pieces([Rook("black", [0,0]),King("white", [7,0]),Rook("black",[0,0])])
 
     def create_board_pawn_can_move_diagonally(self):
-        chessboard = ChessBoard()
-        chessboard.board = [[0,0,0,0,0,0,0,0],\
-                            [0,0,0,0,0,0,0,0],\
-                            [0,0,0,0,0,0,0,0],\
-                            [0,Pawn("black", [3,1]),0,0,0,0,0,0],\
-                            [Pawn("white",[4,0]),0,0,0,0,0,0,0],\
-                            [0,0,0,0,0,0,0,0],\
-                            [0,0,0,0,0,0,0,0],\
-                            [0,0,0,0,0,0,0,0]]
-        return chessboard
+        return TestHelpers().create_board_from_pieces([Pawn("black", [3,1]),Pawn("white",[4,0])])
 
     def create_pawn_in_way_of_rook(self):
-        chessboard = ChessBoard()
-        chessboard.board = [[0,0,0,0,0,0,0,0],\
-                            [0,0,0,0,0,0,0,0],\
-                            [0,0,0,0,0,0,0,0],\
-                            [0,Pawn("black", [3,1]),0,0,0,0,0,0],\
-                            [Pawn("white",[4,0]),0,0,0,0,0,0,0],\
-                            [0,0,0,0,0,0,0,0],\
-                            [0,0,0,0,0,0,0,0],\
-                            [Rook("white",[7,0]),0,0,0,0,0,0,0]]
-        return chessboard
-
-    def create_empty_board(self):
-        chessboard = ChessBoard()
-        chessboard.board = [[0,0,0,0,0,0,0,0],\
-                            [0,0,0,0,0,0,0,0],\
-                            [0,0,0,0,0,0,0,0],\
-                            [0,0,0,0,0,0,0,0],\
-                            [0,0,0,0,0,0,0,0],\
-                            [0,0,0,0,0,0,0,0],\
-                            [0,0,0,0,0,0,0,0],\
-                            [0,0,0,0,0,0,0,0]]
-        return chessboard
+        return TestHelpers().create_board_from_pieces([Pawn("black", [3,1]),Pawn("white",[4,0]),Rook("white",[7,0])])
 
     def create_board_white_in_checkmate(self):
-        chessboard = ChessBoard()
-        chessboard.board = [[King("black",[0,0]),0,0,0,0,0,0,0],\
-                            [0,0,0,0,0,0,0,0],\
-                            [0,0,0,0,0,0,0,0],\
-                            [0,Pawn("black", [3,1]),0,0,0,0,0,0],\
-                            [Pawn("white",[4,0]),0,0,0,0,0,0,0],\
-                            [0,0,0,0,0,0,0,0],\
-                            [Pawn("white",[6,0]),Pawn("white",[6,1]),0,0,0,0,0,0],\
-                            [King("white",[7,0]),0,0,0,0,0,0,Rook("black",[7,7])]]
-        return chessboard
-
-
+        return TestHelpers().create_board_from_pieces([King("black",[0,0]),Pawn("black", [3,1]),Pawn("white",[4,0]),Pawn("white",[6,0]),Pawn("white",[6,1]),King("white",[7,0]),Rook("black",[7,7])])
 
     def write_seek_new_stdin(self, write_string):
         sys.stdin = StringIO()
@@ -135,11 +84,6 @@ class ChessBoardTests:
         with redirect_stdout(output):
             func()
         return output.getvalue()
-
-
-
-
-#everything above is to be put in a helper class
 
     def assert_pawn_rows_correctness(self):
         chessboard = ChessBoard().board
@@ -320,7 +264,7 @@ wr | wk | wb | wQ | wK | wb | wk | wr"""
     def get_pieces_for_color_test(self):
         self.check_get_pieces_given_board_and_amt(ChessBoard(), 16)
         self.check_get_pieces_given_board_and_amt(self.create_pawn_in_way_of_rook(),2)
-        self.check_get_pieces_given_board_and_amt(self.create_empty_board(),0)
+        self.check_get_pieces_given_board_and_amt(TestHelpers().create_empty_board(),0)
 
     def piece_can_take_coord_test(self):
         self.check_piece_cant_take()
@@ -363,7 +307,3 @@ wr | wk | wb | wQ | wK | wb | wk | wr"""
             else:
                 seen_pieces.add(piece)
         assert passed and len(actual_pieces) == amount_pieces
-        
-
-
-
