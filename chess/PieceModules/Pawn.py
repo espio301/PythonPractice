@@ -8,9 +8,6 @@ class Pawn(Piece):
         if color == "white":
             self.invert_move_patterns()
 
-    def get_coords(self):
-        return super().get_coords()
-
     def set_coords(self, coords):
         self.coordinates = coords
         self.remove_pawn_ummoved_pattern()
@@ -20,12 +17,6 @@ class Pawn(Piece):
             self.move_patterns.remove([2,0])
         if [-2,0] in self.move_patterns:
             self.move_patterns.remove([-2,0])
-
-    def to_string(self):
-        return super().to_string()
-
-    def get_color(self):
-        return super().get_color()
 
     def get_exception_patterns(self):
         return [[1,1], [-1,-1], [1,-1], [-1,1]]
