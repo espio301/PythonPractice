@@ -64,6 +64,7 @@ class ChessBoardTests:
     def create_board_white_in_checkmate(self):
         return TestHelpers().create_board_from_pieces([King("black",[0,0]),Pawn("black", [3,1]),Pawn("white",[4,0]),Pawn("white",[6,0]),Pawn("white",[6,1]),King("white",[7,0]),Rook("black",[7,7])])
 
+
     def write_seek_new_stdin(self, write_string):
         sys.stdin = StringIO()
         sys.stdin.write(write_string)
@@ -125,6 +126,7 @@ wr | wk | wb | wQ | wK | wb | wk | wr"""
 
     def get_sanitized_coords_test(self):
         self.test_correct_coords()
+        self.test_correct_chess_notation()
         self.assert_given_coords_not_sanitizable(",")
         self.assert_given_coords_not_sanitizable("j,k")
         self.assert_given_coords_not_sanitizable("00,1")
@@ -132,6 +134,10 @@ wr | wk | wb | wQ | wK | wb | wk | wr"""
     def test_correct_coords(self):
         self.write_seek_new_stdin("6,7\n")
         assert ChessBoard().get_sanitized_coords() == [6,7]
+    
+    def test_correct_chess_notation(self):
+        self.write_seek_new_stdin("b4\n") #goated opening
+        assert ChessBoard().get_sanitized_coords() == [4,1]
 
     def assert_given_coords_not_sanitizable(self, unsanitizable_string):
         self.write_seek_new_stdin(f"{unsanitizable_string}\n6,7\n")

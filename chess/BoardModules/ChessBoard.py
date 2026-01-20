@@ -18,6 +18,7 @@ from PieceModules.Piece import Piece
 LEN_SIDE = 8
 OPPOSITE_COLOR = {"white":"black", "black":"white"}
 PIECES_DISREGARD_COLLISIONS = ["knight"]
+CHESS_NOTATION_LETTER_CONVERTER = {"a":0, "b":1, "c":2, "d":3, "e":4, "f":5, "g":6, "h":7}
 
 class ChessBoard():
     def __init__(self):
@@ -88,11 +89,31 @@ class ChessBoard():
 
     def get_sanitized_coords(self):
         user_in = input()
-        while len(user_in) != 3 or not self.is_sanitary_digit(user_in[0]) or user_in[1] != "," or (not self.is_sanitary_digit(user_in[2])):
+        while not self.is_sanitary_coords(user_in) and not self.is_sanitary_chess_notation(user_in):
             user_in = input()
         return self.convert_input_to_coords(user_in)
 
+    def is_sanitary_coords(self, user_in):
+        return len(user_in) == 3 and self.is_sanitary_digit(user_in[0]) and user_in[1] == "," and self.is_sanitary_digit(user_in[2])
+
+    def convert_chess_notation_to_standard_input(self, user_in):
+        letter = user_in[0].lower()
+        number = int(user_in[1])
+        return f"{LEN_SIDE-number},{CHESS_NOTATION_LETTER_CONVERTER[letter]}"
+
+    def is_sanitary_chess_notation(self, user_in):
+        if len(user_in) == 2:
+            letter = user_in[0].lower()
+            number = user_in[1]
+            return self.letter_and_number_within_bounds(letter, number)
+        return False
+
+    def letter_and_number_within_bounds(self, letter, number):
+        return letter >= 'a' and letter <= 'h' and number.isdigit() and int(number) <= LEN_SIDE and int(number) >= 1
+
     def convert_input_to_coords(self, user_in):
+        if len(user_in) == 2:
+            user_in = self.convert_chess_notation_to_standard_input(user_in)
         coords = []
         split_input = user_in.split(",")
         for el in split_input:
