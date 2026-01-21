@@ -54,13 +54,13 @@ class ChessBoardTests:
             assert isinstance(black_piece, row_pieces[i]) and isinstance(white_piece, row_pieces[i]) and black_piece.get_color() == "black" and white_piece.get_color()
 
     def create_board_white_in_check(self):
-        return TestHelpers().create_board_from_pieces([Rook("black", [0,0]),King("white", [7,0]),Rook("black",[0,0])])
+        return TestHelpers().create_board_from_pieces([Rook("black", [0,0]),King("white", [7,0]),King("black",[5,5])])
 
     def create_board_pawn_can_move_diagonally(self):
-        return TestHelpers().create_board_from_pieces([Pawn("black", [3,1]),Pawn("white",[4,0])])
+        return TestHelpers().create_board_from_pieces([King("white",[7,0]), King("black",[0,0]),Pawn("black", [3,1]),Pawn("white",[4,0])])
 
     def create_pawn_in_way_of_rook(self):
-        return TestHelpers().create_board_from_pieces([Pawn("black", [3,1]),Pawn("white",[4,0]),Rook("white",[7,0])])
+        return TestHelpers().create_board_from_pieces([Pawn("black", [3,1]),Pawn("white",[4,0]),Rook("white",[7,0]), King("white",[7,1]), King("black",[0,7])])
 
     def create_board_white_in_checkmate(self):
         return TestHelpers().create_board_from_pieces([King("black",[0,0]),Pawn("black", [3,1]),Pawn("white",[4,0]),Pawn("white",[6,0]),Pawn("white",[6,1]),King("white",[7,0]),Rook("black",[7,7])])
@@ -275,9 +275,9 @@ wr | wk | wb | wQ | wK | wb | wk | wr"""
         TestHelpers().assert_equal_elements([[6,3],[6,4],[6,5],[7,3],[7,5]], potential_moves)
         
     def get_pieces_for_color_test(self):
-        self.check_get_pieces_given_board_and_amt(ChessBoard(), 16)
-        self.check_get_pieces_given_board_and_amt(self.create_pawn_in_way_of_rook(),2)
-        self.check_get_pieces_given_board_and_amt(TestHelpers().create_empty_board(),0)
+        self.check_get_white_pieces_given_board_and_amt(ChessBoard(), 16)
+        self.check_get_white_pieces_given_board_and_amt(self.create_pawn_in_way_of_rook(),3)
+        self.check_get_white_pieces_given_board_and_amt(TestHelpers().create_empty_board(),0)
 
     def piece_can_take_coord_test(self):
         self.check_piece_cant_take()
@@ -310,7 +310,7 @@ wr | wk | wb | wQ | wK | wb | wk | wr"""
         chessboard = self.create_board_white_in_checkmate()
         assert "black wins!\n" == self.get_stdout_of_func(chessboard.check_and_execute_win_state)
 
-    def check_get_pieces_given_board_and_amt(self, chessboard, amount_pieces):
+    def check_get_white_pieces_given_board_and_amt(self, chessboard, amount_pieces):
         passed = True
         actual_pieces = chessboard.get_pieces_for_color("white")
         seen_pieces = set()

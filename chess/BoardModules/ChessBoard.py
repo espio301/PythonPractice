@@ -151,15 +151,12 @@ class ChessBoard():
         piece = self.board[start_coords[0]][start_coords[1]]
         attacked_coords = self.get_attacked_coords(piece)
         for end_coords in attacked_coords:
-        #check for each tile 
-            if self.is_valid_movement(start_coords, end_coords) and self.is_move_unchecks_king(start_coords, end_coords):
+            if self.is_valid_movement(start_coords, end_coords) and self.is_legal_move_via_checked_state(start_coords, end_coords):
                 return True
-        #   if being here, the king would still be in check
-                #return True
         return False
 
     #would be better to make deep copy so if for w/e reason things get parallelized it wouldnt get messy here maybe? idk not thinking deeply about it
-    def is_move_unchecks_king(self, start_coords, end_coords):
+    def is_legal_move_via_checked_state(self, start_coords, end_coords):
         piece = self.board[start_coords[0]][start_coords[1]]
         dummy_board = ChessBoard()
         dummy_board.board = self.deep_copy_board()
@@ -169,7 +166,7 @@ class ChessBoard():
     def is_valid_movement(self, origin, end):
         origin_piece = self.board[origin[0]][origin[1]]
         origin_color = origin_piece.get_color()
-        if not self.coord_is_piece_and_is_color(end, origin_color) and origin_piece.is_valid_move_pattern(end) and not self.is_banned_pawn_exception(origin,end) and not self.is_piece_in_the_way(origin, end):
+        if not self.coord_is_piece_and_is_color(end, origin_color) and origin_piece.is_valid_move_pattern(end) and not self.is_banned_pawn_exception(origin,end) and not self.is_piece_in_the_way(origin, end) and self.is_legal_move_via_checked_state(origin, end):
             return True
         return False
 
