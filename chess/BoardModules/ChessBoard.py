@@ -52,6 +52,20 @@ class ChessBoard():
             row_entries.append(" | ".join(column_entries))
         return "\n".join(row_entries)
 
+    def deep_copy_board(self):
+        board = []
+        for r in range(LEN_SIDE):
+            row = []
+            for c in range(LEN_SIDE):
+                if isinstance(self.board[r][c],Piece):
+                    piece = self.board[r][c]
+                    type_piece = type(self.board[r][c])
+                    row.append(type_piece(piece.get_color(), piece.get_coords()))
+                else:
+                    row.append(0)
+            board.append(row)
+        return board
+
     def create_initial_king_row(self, color):
         initialized_row = [Rook(color, [0,0]), Knight(color, [0,0]), Bishop(color, [0,0]), Queen(color, [0,0]), King(color, [0,0]), Bishop(color,[0,0]), Knight(color,[0,0]), Rook(color,[0,0])]
         row = 0
@@ -123,20 +137,41 @@ class ChessBoard():
     def get_user_piece_to_move(self, color):
         print("coords to move from: ")
         coords = self.get_sanitized_coords()
-        while self.coord_is_piece_and_is_color(coords, OPPOSITE_COLOR[color]) or self.board[coords[0]][coords[1]] == 0 or self.is_moving_non_king_in_check(color,coords):
+        while self.coord_is_piece_and_is_color(coords, OPPOSITE_COLOR[color]) or self.board[coords[0]][coords[1]] == 0 or not self.is_valid_piece_to_move(color, coords):
             print("coords to move from: ")
             coords = self.get_sanitized_coords()
         return coords
 
-    def is_moving_non_king_in_check(self, color, coords):
-        return self.is_color_in_check(color) and not isinstance(self.board[coords[0]][coords[1]], King)
+    def is_valid_piece_to_move(self, color, coords): #TODO should return True if the piece can block the king from check
+        return not self.is_color_in_check(color) or isinstance(self.board[coords[0]][coords[1]], King) or self.piece_can_uncheck_king(coords)
+
+    #next is move to has to validate the move doesnt put king in check
+    def piece_can_uncheck_king(self, start_coords):
+        #get movement tiles for the piece
+        piece = self.board[start_coords[0]][start_coords[1]]
+        attacked_coords = self.get_attacked_coords(piece)
+        for end_coords in attacked_coords:
+        #check for each tile 
+            if self.is_valid_movement(start_coords, end_coords) and self.is_move_unchecks_king(start_coords, end_coords):
+                return True
+        #   if being here, the king would still be in check
+                #return True
+        return False
+
+    #would be better to make deep copy so if for w/e reason things get parallelized it wouldnt get messy here maybe? idk not thinking deeply about it
+    def is_move_unchecks_king(self, start_coords, end_coords):
+        piece = self.board[start_coords[0]][start_coords[1]]
+        dummy_board = ChessBoard()
+        dummy_board.board = self.deep_copy_board()
+        dummy_board.move(start_coords, end_coords)
+        return not dummy_board.is_color_in_check(piece.get_color())
 
     def is_valid_movement(self, origin, end):
         origin_piece = self.board[origin[0]][origin[1]]
         origin_color = origin_piece.get_color()
-        if self.coord_is_piece_and_is_color(end, origin_color) or not origin_piece.is_valid_move_pattern(end) or self.is_banned_pawn_exception(origin,end):
-            return False
-        return True
+        if not self.coord_is_piece_and_is_color(end, origin_color) and origin_piece.is_valid_move_pattern(end) and not self.is_banned_pawn_exception(origin,end) and not self.is_piece_in_the_way(origin, end):
+            return True
+        return False
 
     def is_banned_pawn_exception(self, origin, end): #returns true if is an allowable exception, false otherwise
         delta = self.get_delta_two_points(origin, end)
@@ -153,7 +188,7 @@ class ChessBoard():
         direction = self.get_step_direction(origin, destination)
         piece = self.board[origin[0]][origin[1]]
         if piece.get_name() in PIECES_DISREGARD_COLLISIONS:
-            return True
+            return False
         cur_coords = [origin[0] + direction[0], origin[1] + direction[1]]
         while cur_coords != destination:
             if self.board[cur_coords[0]][cur_coords[1]] != 0:
@@ -174,7 +209,7 @@ class ChessBoard():
     def get_user_move_to_coords(self, origin):
         print("coords to move to:")
         destination = self.get_sanitized_coords()
-        while not self.is_valid_movement(origin, destination) or self.is_piece_in_the_way(origin, destination):
+        while not self.is_valid_movement(origin, destination):
             print("coords to move to:")
             destination = self.get_sanitized_coords()
         return destination

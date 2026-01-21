@@ -42,6 +42,7 @@ class ChessBoardTests:
         self.piece_can_take_coord_test()
         self.get_attacked_coords_test()
         self.check_and_execute_win_state_test()
+        self.piece_can_uncheck_king_test()
         print("finished with ChessBoard tests")
 
     def assert_first_last_row_correctness(self):
@@ -63,6 +64,12 @@ class ChessBoardTests:
 
     def create_board_white_in_checkmate(self):
         return TestHelpers().create_board_from_pieces([King("black",[0,0]),Pawn("black", [3,1]),Pawn("white",[4,0]),Pawn("white",[6,0]),Pawn("white",[6,1]),King("white",[7,0]),Rook("black",[7,7])])
+
+    def create_board_white_in_checkmate(self):
+        return TestHelpers().create_board_from_pieces([King("black",[0,0]),Pawn("black", [3,1]),Pawn("white",[4,0]),Pawn("white",[6,0]),Pawn("white",[6,1]),King("white",[7,0]),Rook("black",[7,7])])
+
+    def create_rook_to_uncheck_king_board(self):
+        return TestHelpers().create_board_from_pieces([King("black",[0,0]),Rook("black", [1,0]),King("white",[7,0]),Rook("white",[6,7])])
 
 
     def write_seek_new_stdin(self, write_string):
@@ -313,3 +320,8 @@ wr | wk | wb | wQ | wK | wb | wk | wr"""
             else:
                 seen_pieces.add(piece)
         assert passed and len(actual_pieces) == amount_pieces
+
+    def piece_can_uncheck_king_test(self):
+        chessboard = self.create_rook_to_uncheck_king_board()
+        assert chessboard.piece_can_uncheck_king([6,7])
+
