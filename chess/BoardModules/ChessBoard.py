@@ -37,8 +37,6 @@ class ChessBoard():
         board.append(self.create_initial_king_row("white"))
         return board
 
-    def is_open_tile(self, coords):
-        return self.board[coords[0]][coords[1]] == 0
 
     def to_string(self):
         row_entries = []
@@ -51,6 +49,9 @@ class ChessBoard():
                     column_entries.append("--")
             row_entries.append(" | ".join(column_entries))
         return "\n".join(row_entries)
+
+    def is_open_tile(self, coords):
+        return self.board[coords[0]][coords[1]] == 0
 
     def deep_copy_board(self):
         board = []
@@ -94,7 +95,7 @@ class ChessBoard():
         return self.board[coords[0]][coords[1]].get_color() == color
 
     def is_sanitary_digit(self, digit):
-        if digit.isdigit() == False or int(digit) < 0 or int(digit) > 7:
+        if not digit.isdigit() or int(digit) < 0 or int(digit) >= LEN_SIDE:
             return False
         return True
 
@@ -137,7 +138,7 @@ class ChessBoard():
     def get_user_piece_to_move(self, color):
         print("coords to move from: ")
         coords = self.get_sanitized_coords()
-        while self.coord_is_piece_and_is_color(coords, OPPOSITE_COLOR[color]) or self.board[coords[0]][coords[1]] == 0 or not self.is_valid_piece_to_move(color, coords):
+        while self.coord_is_piece_and_is_color(coords, OPPOSITE_COLOR[color]) or self.is_open_tile(coords) or not self.is_valid_piece_to_move(color, coords):
             print("coords to move from: ")
             coords = self.get_sanitized_coords()
         return coords
@@ -145,9 +146,7 @@ class ChessBoard():
     def is_valid_piece_to_move(self, color, coords): #TODO should return True if the piece can block the king from check
         return not self.is_color_in_check(color) or isinstance(self.board[coords[0]][coords[1]], King) or self.piece_can_uncheck_king(coords)
 
-    #next is move to has to validate the move doesnt put king in check
     def piece_can_uncheck_king(self, start_coords):
-        #get movement tiles for the piece
         piece = self.board[start_coords[0]][start_coords[1]]
         attacked_coords = self.get_attacked_coords(piece)
         for end_coords in attacked_coords:
@@ -192,22 +191,9 @@ class ChessBoard():
         rook_start = end
         king_end = self.get_king_rook_end_post_castle(end)[0]
         rook_end = self.get_king_rook_end_post_castle(end)[1]
-        if  not self.is_piece_in_the_way(origin,end) and not self.is_color_in_check(origin_tile.get_color()) and origin_tile.get_has_moved() and end_tile.get_has_moved() and not self.is_color_in_check_post_movements([[king_start, king_end],[rook_start, rook_end]], origin_tile.get_color()):
+        if not self.is_piece_in_the_way(origin,end) and not self.is_color_in_check(origin_tile.get_color()) and origin_tile.get_has_moved() and end_tile.get_has_moved() and not self.is_color_in_check_post_movements([[king_start, king_end],[rook_start, rook_end]], origin_tile.get_color()):
                 return True
         return False
-
-    def is_coords_pieces_of_same_color(self, coords):
-        seen_colors = set()
-        for coord in coords:
-            tile = self.board[coord[0]][coord[1]]
-            if tile == 0:
-                return False
-            color = tile.get_color()
-            if color not in seen_colors:
-                seen_colors.add(color)
-            if len(seen_colors) > 1:
-                return False
-        return True
 
     def get_king_rook_end_post_castle(self,rook_position):
             get_king_rook_post_castle_coords = {(7,0): [[7,2],[7,3]], (7,7):[[7,6],[7,5]], (0,0): [[0,2],[0,3]], (0,7):[[0,6],[0,5]]}
@@ -239,6 +225,7 @@ class ChessBoard():
         piece = self.board[origin[0]][origin[1]]
         if piece.get_name() in PIECES_DISREGARD_COLLISIONS:
             return False
+
         cur_coords = [origin[0] + direction[0], origin[1] + direction[1]]
         while cur_coords != destination:
             if self.board[cur_coords[0]][cur_coords[1]] != 0:
@@ -300,20 +287,25 @@ class ChessBoard():
                 return True
         return False
 
-    #need to think of a better name or refactor this. it returns the moves that are not out of bounds. it WILL include moves that are attacked by enemy or are spots already taken.
     def get_king_potential_moves(self, piece):
-        move_patterns = piece.get_move_patterns()
-        potential_moves = []
+        potential_moves = self.get_potential_moves(piece)
         illegal_moves = []
-        piece_coords = piece.get_coords()
-        for pattern in move_patterns:
-            potential_moves.append([piece_coords[0] + pattern[0], piece_coords[1] + pattern[1]])
         for potential_move in potential_moves:
-            if potential_move[0] < 0 or potential_move[0] >= LEN_SIDE or potential_move[1] < 0 or potential_move[1] >= LEN_SIDE:
+            if self.is_coord_is_out_of_bounds(potential_move):
                 illegal_moves.append(potential_move)
         for illegal_move in illegal_moves:
             potential_moves.remove(illegal_move)
         return potential_moves
+
+    def get_potential_moves(self, piece):
+        potential_moves = []
+        piece_coords = piece.get_coords()
+        for pattern in piece.get_move_patterns():
+            potential_moves.append([piece_coords[0] + pattern[0], piece_coords[1] + pattern[1]])
+        return potential_moves
+
+    def is_coord_is_out_of_bounds(self, coord):
+        return coord[0] < 0 or coord[1] < 0 or coord[0] >= LEN_SIDE or coord[1] >= LEN_SIDE
 
     def is_color_in_check(self, color):
         enemy_color = OPPOSITE_COLOR[color]
