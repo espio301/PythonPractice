@@ -44,6 +44,7 @@ class ChessBoardTests:
         self.check_and_execute_win_state_test()
         self.piece_can_uncheck_king_test()
         self.is_valid_castle_movement_test()
+        self.is_color_have_valid_moves_test()
         print("finished with ChessBoard tests")
 
     def assert_first_last_row_correctness(self):
@@ -76,7 +77,13 @@ class ChessBoardTests:
         return TestHelpers().create_board_from_pieces([King("black",[0,0]),Rook("black", [1,0]),King("white",[7,4]),Rook("white",[7,0])])
 
     def create_non_castleable_left_board(self):
-        return TestHelpers().create_board_from_pieces([King("black",[0,0]),Rook("black", [1,0]),King("white",[7,4]),Rook("white",[7,0], Queen("white",[7,1]))])
+        return TestHelpers().create_board_from_pieces([King("black",[0,0]),Rook("black", [1,0]),King("white",[7,4]),Rook("white",[7,0]), Queen("white",[7,1])])
+    
+    def create_white_in_stalemate_board(self):
+        return TestHelpers().create_board_from_pieces([King("white",[7,0]), King("black", [0,0]), Rook("black", [0,1]), Rook("black",[6,7])])
+
+    def create_white_not_stalemate_board(self):
+        return TestHelpers().create_board_from_pieces([King("white",[7,0]), King("black", [0,0]), Rook("black", [2,1]), Rook("black",[6,7]), Pawn("white", [6,0])])
 
 
     def write_seek_new_stdin(self, write_string):
@@ -278,8 +285,8 @@ wr | wk | wb | wQ | wK | wb | wk | wr"""
 
     def get_king_potential_moves_test(self):
         chessboard = ChessBoard()
-        potential_moves = chessboard.get_king_potential_moves(chessboard.board[7][4]) 
-        TestHelpers().assert_equal_elements([[6,3],[6,4],[6,5],[7,3],[7,5]], potential_moves)
+        potential_moves = chessboard.get_valid_potential_moves(chessboard.board[7][4]) 
+        TestHelpers().assert_equal_elements([], potential_moves)
         
     def get_pieces_for_color_test(self):
         self.check_get_white_pieces_given_board_and_amt(ChessBoard(), 16)
@@ -312,6 +319,7 @@ wr | wk | wb | wQ | wK | wb | wk | wr"""
         
     def check_and_execute_win_state_test(self):
         chessboard = self.create_board_white_in_checkmate()
+        func_output = self.get_stdout_of_func(chessboard.check_and_execute_win_state)
         assert "black wins!\n" == self.get_stdout_of_func(chessboard.check_and_execute_win_state)
 
     def check_get_white_pieces_given_board_and_amt(self, chessboard, amount_pieces):
@@ -339,5 +347,29 @@ wr | wk | wb | wQ | wK | wb | wk | wr"""
     def check_invalid_castle_movement(self):
         chessboard = self.create_non_castleable_left_board()
         assert not chessboard.is_valid_castle_movement([7,4],[7,0])
+
+    def is_color_have_valid_moves_test(self):
+        self.check_no_valid_move_stalemate()
+        self.check_not_in_stalemate_state()
+        self.check_repeated_move_stalemate()
+
+    def check_no_valid_move_stalemate(self):
+        chessboard = self.create_white_in_stalemate_board()
+        assert chessboard.stalemate_checker()
+
+    def check_not_in_stalemate_state(self):
+        chessboard = self.create_white_not_stalemate_board()
+        assert not chessboard.stalemate_checker()
+
+    def check_repeated_move_stalemate(self):
+        chessboard = ChessBoard()
+        board_string = self.create_board_pawn_can_move_diagonally().to_string()
+        irrelevant_board_string = self.create_non_castleable_left_board().to_string()
+        chessboard.board_states.append(board_string)
+        chessboard.board_states.append(board_string)
+        chessboard.board_states.append(irrelevant_board_string)
+        chessboard.board_states.append(board_string)
+        assert chessboard.stalemate_checker()
+
 
 

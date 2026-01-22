@@ -3,7 +3,7 @@ class King(Piece):
     def __init__(self, color : str, coordinates):
         super().__init__(color, coordinates)
         self.name="King"
-        self.has_moved = True
+        self.has_moved = False
         self.move_patterns = []
         self.set_king_move_patterns()
     
@@ -15,7 +15,7 @@ class King(Piece):
 
     def set_coords(self, coordinates):
         self.coordinates = coordinates
-        self.has_moved = False
+        self.has_moved = True
 
     def get_has_moved(self):
         return self.has_moved

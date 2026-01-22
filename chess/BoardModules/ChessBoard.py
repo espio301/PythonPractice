@@ -25,6 +25,7 @@ class ChessBoard():
         self.board = self.create_initial_board()
         self.turn_count = 0
         self.game_is_over = False
+        self.board_states = []
 
 
     def create_initial_board(self):
@@ -154,7 +155,6 @@ class ChessBoard():
                 return True
         return False
 
-    #would be better to make deep copy so if for w/e reason things get parallelized it wouldnt get messy here maybe? idk not thinking deeply about it
     def is_legal_move_via_checked_state(self, start_coords, end_coords):
         piece = self.board[start_coords[0]][start_coords[1]]
         dummy_board = ChessBoard()
@@ -175,23 +175,25 @@ class ChessBoard():
     def is_valid_movement(self, origin, end):
         origin_piece = self.board[origin[0]][origin[1]]
         origin_color = origin_piece.get_color()
-        if self.is_valid_castle_movement(origin,end):
-            return True
-        if not self.coord_is_piece_and_is_color(end, origin_color) and origin_piece.is_valid_move_pattern(end) and not self.is_banned_pawn_exception(origin,end) and not self.is_piece_in_the_way(origin, end) and self.is_legal_move_via_checked_state(origin, end):
+        if self.is_coord_is_out_of_bounds(end) or  self.is_banned_pawn_exception(origin,end) or self.is_piece_in_the_way(origin,end):
+            return False
+        if not self.coord_is_piece_and_is_color(end, origin_color) and origin_piece.is_valid_move_pattern(end) and self.is_legal_move_via_checked_state(origin, end) or self.is_valid_castle_movement(origin,end):
             return True
         return False
 
     def is_valid_castle_movement(self, origin, end):
         origin_tile = self.board[origin[0]][origin[1]]
         end_tile = self.board[end[0]][end[1]]
-        if not self.is_coords_are_types_and_colors([origin, end], [King,Rook], ["white", "white"]) and not self.is_coords_are_types_and_colors([origin, end], [King,Rook], ["black", "black"]): #the book says never to use 3 parameters. 
+
+        if not self.is_coords_are_types_and_colors([origin, end], [King,Rook], ["white", "white"]) and not self.is_coords_are_types_and_colors([origin, end], [King,Rook], ["black", "black"]):
             return False
-        
+        if origin_tile.get_has_moved() or end_tile.get_has_moved():
+            return False
         king_start = origin
         rook_start = end
         king_end = self.get_king_rook_end_post_castle(end)[0]
         rook_end = self.get_king_rook_end_post_castle(end)[1]
-        if not self.is_piece_in_the_way(origin,end) and not self.is_color_in_check(origin_tile.get_color()) and origin_tile.get_has_moved() and end_tile.get_has_moved() and not self.is_color_in_check_post_movements([[king_start, king_end],[rook_start, rook_end]], origin_tile.get_color()):
+        if not self.is_piece_in_the_way(origin,end) and not self.is_color_in_check(origin_tile.get_color()) and not self.is_color_in_check_post_movements([[king_start, king_end],[rook_start, rook_end]], origin_tile.get_color()):
                 return True
         return False
 
@@ -268,13 +270,19 @@ class ChessBoard():
     def is_color_in_checkmate(self, color):
         if self.is_color_in_check(color) and not self.is_king_of_color_moveable(color):
             return True
-        #we could probably add stalemate mechanics here if we decide to (should do it but I'm running out of time)
         return False
+
+    def is_color_have_valid_moves(self,color):
+        colors_pieces = self.get_pieces_for_color(color)
+        for piece in colors_pieces:
+            if len(self.get_valid_potential_moves(piece)) > 0:
+                return False
+        return True
 
     def is_king_of_color_moveable(self, color):
         king_coords = self.get_king_of_color_coords(color)
         king = self.board[king_coords[0]][king_coords[1]]
-        potential_moves = self.get_king_potential_moves(king)
+        potential_moves = self.get_valid_potential_moves(king)
         for potential_move in potential_moves:
             if not self.is_coord_attacked_by_color(potential_move, OPPOSITE_COLOR[color]) and not isinstance(self.board[potential_move[0]][potential_move[1]], Piece):
                 return True
@@ -287,21 +295,22 @@ class ChessBoard():
                 return True
         return False
 
-    def get_king_potential_moves(self, piece):
-        potential_moves = self.get_potential_moves(piece)
+    def get_valid_potential_moves(self, piece):
+        potential_moves = self.get_all_potential_moves(piece)
         illegal_moves = []
         for potential_move in potential_moves:
-            if self.is_coord_is_out_of_bounds(potential_move):
+            if not self.is_valid_movement(piece.get_coords(), potential_move):
                 illegal_moves.append(potential_move)
         for illegal_move in illegal_moves:
             potential_moves.remove(illegal_move)
         return potential_moves
 
-    def get_potential_moves(self, piece):
+    def get_all_potential_moves(self, piece):
         potential_moves = []
         piece_coords = piece.get_coords()
         for pattern in piece.get_move_patterns():
             potential_moves.append([piece_coords[0] + pattern[0], piece_coords[1] + pattern[1]])
+        
         return potential_moves
 
     def is_coord_is_out_of_bounds(self, coord):
@@ -358,12 +367,28 @@ class ChessBoard():
         if self.is_color_in_checkmate("black"):
             print("white wins!")
             self.game_is_over = True
+        if self.stalemate_checker() and not self.game_is_over:
+            print("stalemate")
+
+    def stalemate_checker(self):
+        return self.is_color_have_valid_moves("white") or self.is_color_have_valid_moves("black") or self.is_stalemate_via_board_states()
+
+    def is_stalemate_via_board_states(self):
+        board_states_map = {}
+        for state in self.board_states:
+            if state not in board_states_map:
+                board_states_map[state] = 0
+            board_states_map[state] += 1
+            if board_states_map[state] >= 3:
+                return True
+        return False
 
     def movement_handler(self, start, end):
         if self.is_valid_castle_movement(start,end):
             self.castle_movement_handler(start,end)
         else:
             self.move(start,end)
+        self.board_states.append(self.to_string())
 
     def castle_movement_handler(start,end):
         king_end = self.get_king_rook_post_castle_coords(start,end)[0]
