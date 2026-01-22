@@ -72,8 +72,11 @@ class ChessBoardTests:
     def create_rook_to_uncheck_king_board(self):
         return TestHelpers().create_board_from_pieces([King("black",[0,0]),Rook("black", [1,0]),King("white",[7,0]),Rook("white",[6,7])])
 
-    def create_castleble_left_board(self):
+    def create_castleable_left_board(self):
         return TestHelpers().create_board_from_pieces([King("black",[0,0]),Rook("black", [1,0]),King("white",[7,4]),Rook("white",[7,0])])
+
+    def create_non_castleable_left_board(self):
+        return TestHelpers().create_board_from_pieces([King("black",[0,0]),Rook("black", [1,0]),King("white",[7,4]),Rook("white",[7,0], Queen("white",[7,1]))])
 
 
     def write_seek_new_stdin(self, write_string):
@@ -286,9 +289,6 @@ wr | wk | wb | wQ | wK | wb | wk | wr"""
     def piece_can_take_coord_test(self):
         self.check_piece_cant_take()
         self.check_piece_can_take()
-
-        #piece_cant_take_coord = ChessBoard().piece_can_take_coord()
-        #pawn_can_take_diag = self.create_board_pawn_can_move_diagonally().
         
     def check_piece_cant_take(self):
         default_board = ChessBoard()
@@ -330,8 +330,14 @@ wr | wk | wb | wQ | wK | wb | wk | wr"""
         assert chessboard.piece_can_uncheck_king([6,7])
 
     def is_valid_castle_movement_test(self):
-        chessboard = self.create_castleble_left_board()
-        print("heres our input")
-        chessboard.to_string()
+        self.check_valid_castle_movement()
+
+    def check_valid_castle_movement(self):
+        chessboard = self.create_castleable_left_board()
         assert chessboard.is_valid_castle_movement([7,4],[7,0])
+
+    def check_invalid_castle_movement(self):
+        chessboard = self.create_non_castleable_left_board()
+        assert not chessboard.is_valid_castle_movement([7,4],[7,0])
+
 

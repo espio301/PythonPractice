@@ -3,7 +3,7 @@ class Rook(Piece):
     def __init__(self, color : str, coordinates):
         super().__init__(color, coordinates)
         self.name = "rook"
-        self.can_castle = True
+        self.has_moved = True
         self.move_patterns = []
         self.set_rook_move_patterns()
 
@@ -14,7 +14,7 @@ class Rook(Piece):
 
     def set_coords(self, coordinates):
         self.coordinates = coordinates
-        self.can_castle = False
+        self.has_moved = False
 
-    def get_can_castle(self):
-        return self.can_castle
+    def get_has_moved(self):
+        return self.has_moved

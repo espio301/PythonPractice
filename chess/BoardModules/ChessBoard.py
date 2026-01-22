@@ -166,17 +166,10 @@ class ChessBoard():
     def is_color_in_check_post_movements(self, movement_list, color):
         dummy_board = ChessBoard()
         dummy_board.board = self.deep_copy_board()
-        print("after deep copy")
-        print(dummy_board.to_string())
         for movement in movement_list:
             start_coord = movement[0]
             end_coord = movement[1]
-            print("board before movement")
-            print(dummy_board.to_string())
             dummy_board.move(start_coord, end_coord)
-            print("checking:", movement_list)
-            print(dummy_board.to_string())
-            print("")
         return dummy_board.is_color_in_check(color)
 
 
@@ -190,23 +183,31 @@ class ChessBoard():
         return False
 
     def is_valid_castle_movement(self, origin, end):
-        print(self.to_string(),"\n")
-        origin_piece = self.board[origin[0]][origin[1]]
-        origin_color = origin_piece.get_color()
+        origin_tile = self.board[origin[0]][origin[1]]
+        end_tile = self.board[end[0]][end[1]]
         if not self.is_coords_are_types_and_colors([origin, end], [King,Rook], ["white", "white"]) and not self.is_coords_are_types_and_colors([origin, end], [King,Rook], ["black", "black"]): #the book says never to use 3 parameters. 
             return False
-        #check if origin is king that can castle and end is rook that can castle
-        print(self.coord_is_piece_and_is_color(origin, origin_color), self.coord_is_piece_and_is_color(end, origin_color), isinstance(self.board[end[0]][end[1]], Rook), not self.is_piece_in_the_way(origin,end), not self.is_color_in_check(origin_color), self.board[origin[0]][origin[1]].get_can_castle() == True, self.board[end[0]][end[1]].get_can_castle() == True)
-        if self.coord_is_piece_and_is_color(origin, origin_color) and self.coord_is_piece_and_is_color(end, origin_color) and isinstance(self.board[end[0]][end[1]], Rook) and not self.is_piece_in_the_way(origin,end) and not self.is_color_in_check(origin_color) and self.board[origin[0]][origin[1]].get_can_castle() == True and self.board[end[0]][end[1]].get_can_castle() == True:
-            king_start = origin
-            rook_start = end
-            king_end = self.get_king_rook_end_post_castle(end)[0]
-            rook_end = self.get_king_rook_end_post_castle(end)[1]
-            print("heres what we're moving")
-            print([[king_start, king_end],[rook_start, rook_end]])
-            if not self.is_color_in_check_post_movements([[king_start, king_end],[rook_start, rook_end]], origin_color):
+        
+        king_start = origin
+        rook_start = end
+        king_end = self.get_king_rook_end_post_castle(end)[0]
+        rook_end = self.get_king_rook_end_post_castle(end)[1]
+        if  not self.is_piece_in_the_way(origin,end) and not self.is_color_in_check(origin_tile.get_color()) and origin_tile.get_has_moved() and end_tile.get_has_moved() and not self.is_color_in_check_post_movements([[king_start, king_end],[rook_start, rook_end]], origin_tile.get_color()):
                 return True
         return False
+
+    def is_coords_pieces_of_same_color(self, coords):
+        seen_colors = set()
+        for coord in coords:
+            tile = self.board[coord[0]][coord[1]]
+            if tile == 0:
+                return False
+            color = tile.get_color()
+            if color not in seen_colors:
+                seen_colors.add(color)
+            if len(seen_colors) > 1:
+                return False
+        return True
 
     def get_king_rook_end_post_castle(self,rook_position):
             get_king_rook_post_castle_coords = {(7,0): [[7,2],[7,3]], (7,7):[[7,6],[7,5]], (0,0): [[0,2],[0,3]], (0,7):[[0,6],[0,5]]}
@@ -344,7 +345,6 @@ class ChessBoard():
             for c in range(LEN_SIDE):
                 if self.coord_is_piece_and_is_color([r,c], color) and isinstance(self.board[r][c], King):
                     return [r,c]
-        print(self.to_string())
         raise Exception("There is no king for this color on the board")
 
     def get_attacked_coords(self, piece):
