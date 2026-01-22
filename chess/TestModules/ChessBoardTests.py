@@ -43,6 +43,7 @@ class ChessBoardTests:
         self.get_attacked_coords_test()
         self.check_and_execute_win_state_test()
         self.piece_can_uncheck_king_test()
+        self.is_valid_castle_movement_test()
         print("finished with ChessBoard tests")
 
     def assert_first_last_row_correctness(self):
@@ -70,6 +71,9 @@ class ChessBoardTests:
 
     def create_rook_to_uncheck_king_board(self):
         return TestHelpers().create_board_from_pieces([King("black",[0,0]),Rook("black", [1,0]),King("white",[7,0]),Rook("white",[6,7])])
+
+    def create_castleble_left_board(self):
+        return TestHelpers().create_board_from_pieces([King("black",[0,0]),Rook("black", [1,0]),King("white",[7,4]),Rook("white",[7,0])])
 
 
     def write_seek_new_stdin(self, write_string):
@@ -324,4 +328,10 @@ wr | wk | wb | wQ | wK | wb | wk | wr"""
     def piece_can_uncheck_king_test(self):
         chessboard = self.create_rook_to_uncheck_king_board()
         assert chessboard.piece_can_uncheck_king([6,7])
+
+    def is_valid_castle_movement_test(self):
+        chessboard = self.create_castleble_left_board()
+        print("heres our input")
+        chessboard.to_string()
+        assert chessboard.is_valid_castle_movement([7,4],[7,0])
 

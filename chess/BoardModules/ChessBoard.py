@@ -163,12 +163,64 @@ class ChessBoard():
         dummy_board.move(start_coords, end_coords)
         return not dummy_board.is_color_in_check(piece.get_color())
 
+    def is_color_in_check_post_movements(self, movement_list, color):
+        dummy_board = ChessBoard()
+        dummy_board.board = self.deep_copy_board()
+        print("after deep copy")
+        print(dummy_board.to_string())
+        for movement in movement_list:
+            start_coord = movement[0]
+            end_coord = movement[1]
+            print("board before movement")
+            print(dummy_board.to_string())
+            dummy_board.move(start_coord, end_coord)
+            print("checking:", movement_list)
+            print(dummy_board.to_string())
+            print("")
+        return dummy_board.is_color_in_check(color)
+
+
     def is_valid_movement(self, origin, end):
         origin_piece = self.board[origin[0]][origin[1]]
         origin_color = origin_piece.get_color()
+        if self.is_valid_castle_movement(origin,end):
+            return True
         if not self.coord_is_piece_and_is_color(end, origin_color) and origin_piece.is_valid_move_pattern(end) and not self.is_banned_pawn_exception(origin,end) and not self.is_piece_in_the_way(origin, end) and self.is_legal_move_via_checked_state(origin, end):
             return True
         return False
+
+    def is_valid_castle_movement(self, origin, end):
+        print(self.to_string(),"\n")
+        origin_piece = self.board[origin[0]][origin[1]]
+        origin_color = origin_piece.get_color()
+        if not self.is_coords_are_types_and_colors([origin, end], [King,Rook], ["white", "white"]) and not self.is_coords_are_types_and_colors([origin, end], [King,Rook], ["black", "black"]): #the book says never to use 3 parameters. 
+            return False
+        #check if origin is king that can castle and end is rook that can castle
+        print(self.coord_is_piece_and_is_color(origin, origin_color), self.coord_is_piece_and_is_color(end, origin_color), isinstance(self.board[end[0]][end[1]], Rook), not self.is_piece_in_the_way(origin,end), not self.is_color_in_check(origin_color), self.board[origin[0]][origin[1]].get_can_castle() == True, self.board[end[0]][end[1]].get_can_castle() == True)
+        if self.coord_is_piece_and_is_color(origin, origin_color) and self.coord_is_piece_and_is_color(end, origin_color) and isinstance(self.board[end[0]][end[1]], Rook) and not self.is_piece_in_the_way(origin,end) and not self.is_color_in_check(origin_color) and self.board[origin[0]][origin[1]].get_can_castle() == True and self.board[end[0]][end[1]].get_can_castle() == True:
+            king_start = origin
+            rook_start = end
+            king_end = self.get_king_rook_end_post_castle(end)[0]
+            rook_end = self.get_king_rook_end_post_castle(end)[1]
+            print("heres what we're moving")
+            print([[king_start, king_end],[rook_start, rook_end]])
+            if not self.is_color_in_check_post_movements([[king_start, king_end],[rook_start, rook_end]], origin_color):
+                return True
+        return False
+
+    def get_king_rook_end_post_castle(self,rook_position):
+            get_king_rook_post_castle_coords = {(7,0): [[7,2],[7,3]], (7,7):[[7,6],[7,5]], (0,0): [[0,2],[0,3]], (0,7):[[0,6],[0,5]]}
+            return get_king_rook_post_castle_coords[tuple(rook_position)]
+
+    def is_coords_are_types_and_colors(self, coords, types, colors):
+        for i in range(len(coords)):
+            coord = coords[i]
+            coord_type = types[i]
+            color = colors[i]
+            if not self.coord_is_piece_and_is_color(coord, color) or not isinstance(self.board[coord[0]][coord[1]], coord_type):
+                return False
+        return True
+
 
     def is_banned_pawn_exception(self, origin, end): #returns true if is an allowable exception, false otherwise
         delta = self.get_delta_two_points(origin, end)
@@ -292,6 +344,7 @@ class ChessBoard():
             for c in range(LEN_SIDE):
                 if self.coord_is_piece_and_is_color([r,c], color) and isinstance(self.board[r][c], King):
                     return [r,c]
+        print(self.to_string())
         raise Exception("There is no king for this color on the board")
 
     def get_attacked_coords(self, piece):
@@ -314,6 +367,18 @@ class ChessBoard():
             print("white wins!")
             self.game_is_over = True
 
+    def movement_handler(self, start, end):
+        if self.is_valid_castle_movement(start,end):
+            self.castle_movement_handler(start,end)
+        else:
+            self.move(start,end)
+
+    def castle_movement_handler(start,end):
+        king_end = self.get_king_rook_post_castle_coords(start,end)[0]
+        rook_end = self.get_king_rook_post_castle_coords(start,end)[1]
+        self.move(start,king_end)
+        self.move(end,rook_end)
+
     def game_loop(self):
         players = ["white", "black"]
         print("please enter coordinates in the form row,column")
@@ -323,7 +388,7 @@ class ChessBoard():
             print(f"{color_to_move} to move")
             move_from_coords = self.get_user_piece_to_move(color_to_move)
             move_to_coords = self.get_user_move_to_coords(move_from_coords)
-            self.move(move_from_coords, move_to_coords)
+            self.movement_handler(move_to_coords, move_from_coords)
             print("turn_count",self.turn_count)
             self.check_and_execute_win_state()
             self.turn_count += 1
