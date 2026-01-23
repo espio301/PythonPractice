@@ -6,6 +6,7 @@ from PieceModules.Bishop import Bishop
 from PieceModules.Queen import Queen
 from PieceModules.King import King
 from PieceModules.Piece import Piece
+from typing import Type
 #TODO would take too much time right now, but would've been nice to do a get_tile function with [r,c]
 #TODO pawn can transform to whatever Piece if it reaches the end
 #TODO I'm not going to worry about stalemate rules at the moment
@@ -14,6 +15,13 @@ from PieceModules.Piece import Piece
 #TODO Castling
 #TODO it should be ok to move another piece than the king if it puts the king out of check
 #fastest check mate is 6,5 5,5  1,4 3,4     6,6 4,6     0,3 4,7
+
+
+
+#its ok to break abstraction layers a little, if it makes things more approachable/understandable
+#long names are a little unreadable as well
+#DRY
+#also use types xd
 
 LEN_SIDE = 8
 OPPOSITE_COLOR = {"white":"black", "black":"white"}
@@ -384,13 +392,40 @@ class ChessBoard():
         return False
 
     def movement_handler(self, start, end):
+        print("handler",start,end)
         if self.is_valid_castle_movement(start,end):
             self.castle_movement_handler(start,end)
         else:
+            print("statement", start,end)
             self.move(start,end)
+        self.pawn_promotion_handler()
         self.board_states.append(self.to_string())
 
-    def castle_movement_handler(start,end):
+    def pawn_promotion_handler(self):
+        all_pieces = self.get_pieces_for_color("white") + self.get_pieces_for_color("black")
+        for piece in all_pieces:
+            color = piece.get_color()
+            coords = piece.get_coords()
+            if (color == "white" and coords[0] == 0) or (color == "black" and coords[0] == 7):
+                piece_type = self.get_user_pawn_promo_input()
+                piece = piece_type(color, [0,0])
+                self.board[coords[0]][coords[1]] = piece
+                piece.set_coords(coords)
+        return piece
+
+    def get_user_pawn_promo_input(self):
+        user_in = input("please input what you'd like to promote the pawn to")
+        while not self.pawn_promo_piece(user_in):
+            user_in = input("please input what you'd like to promote the pawn to")
+        return self.pawn_promo_piece(user_in)
+
+    def pawn_promo_piece(self, user_in):
+        pawn_promo_piece = {"knight":Knight, "Bishop": Bishop, "king": King, "queen": Queen, "rook": Rook}
+        if user_in.lower() not in pawn_promo_piece:
+            return None
+        return pawn_promo_piece[user_in.lower()]
+
+    def castle_movement_handler(self, start,end):
         king_end = self.get_king_rook_post_castle_coords(start,end)[0]
         rook_end = self.get_king_rook_post_castle_coords(start,end)[1]
         self.move(start,king_end)
@@ -405,7 +440,7 @@ class ChessBoard():
             print(f"{color_to_move} to move")
             move_from_coords = self.get_user_piece_to_move(color_to_move)
             move_to_coords = self.get_user_move_to_coords(move_from_coords)
-            self.movement_handler(move_to_coords, move_from_coords)
+            self.movement_handler(move_from_coords, move_to_coords)
             print("turn_count",self.turn_count)
             self.check_and_execute_win_state()
             self.turn_count += 1

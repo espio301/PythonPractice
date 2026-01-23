@@ -45,6 +45,7 @@ class ChessBoardTests:
         self.piece_can_uncheck_king_test()
         self.is_valid_castle_movement_test()
         self.is_color_have_valid_moves_test()
+        self.get_user_pawn_promo_input_test()
         print("finished with ChessBoard tests")
 
     def assert_first_last_row_correctness(self):
@@ -84,6 +85,9 @@ class ChessBoardTests:
 
     def create_white_not_stalemate_board(self):
         return TestHelpers().create_board_from_pieces([King("white",[7,0]), King("black", [0,0]), Rook("black", [2,1]), Rook("black",[6,7]), Pawn("white", [6,0])])
+
+    def create_pawn_promo_board(self):
+        return TestHelpers().create_board_from_pieces([King("white",[7,0]), King("black", [0,0]), Pawn("white",[0,5])])
 
 
     def write_seek_new_stdin(self, write_string):
@@ -370,6 +374,13 @@ wr | wk | wb | wQ | wK | wb | wk | wr"""
         chessboard.board_states.append(irrelevant_board_string)
         chessboard.board_states.append(board_string)
         assert chessboard.stalemate_checker()
+
+    def get_user_pawn_promo_input_test(self):
+        chessboard = self.create_pawn_promo_board()
+        self.write_seek_new_stdin("quen\nqueen\n")
+        chessboard.pawn_promotion_handler()
+        assert type(chessboard.board[0][5]) == Queen
+
 
 
 
