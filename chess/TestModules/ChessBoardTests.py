@@ -89,6 +89,8 @@ class ChessBoardTests:
     def create_pawn_promo_board(self):
         return TestHelpers().create_board_from_pieces([King("white",[7,0]), King("black", [0,0]), Pawn("white",[0,5])])
 
+    def create_move_into_pawn_promo_board(self):
+        return TestHelpers().create_board_from_pieces([King("white", [7,0]), King("black", [0,0]), Pawn("white", [1,6]), Pawn("black", [6,6]), Knight("white", [7,7])])
 
     def write_seek_new_stdin(self, write_string):
         sys.stdin = StringIO()
@@ -376,11 +378,34 @@ wr | wk | wb | wQ | wK | wb | wk | wr"""
         assert chessboard.stalemate_checker()
 
     def get_user_pawn_promo_input_test(self):
+        self.silent_run(self.pawn_promote_queen)
+        self.silent_run(self.move_into_pawn_promo_test)
+        self.silent_run(self.black_pawn_promotion_test)
+        self.silent_run(self.pawn_attack_to_promotion_test)
+
+    def pawn_promote_queen(self):
         chessboard = self.create_pawn_promo_board()
         self.write_seek_new_stdin("quen\nqueen\n")
         chessboard.pawn_promotion_handler()
         assert type(chessboard.board[0][5]) == Queen
 
+    def move_into_pawn_promo_test(self):
+        chessboard = self.create_move_into_pawn_promo_board()
+        self.write_seek_new_stdin("rook\n")
+        
+        chessboard.movement_handler([1,6], [0,6])
+        assert type(chessboard.board[0][6]) == Rook
 
+    def black_pawn_promotion_test(self):
+        chessboard = self.create_move_into_pawn_promo_board()
+        self.write_seek_new_stdin("knIght\n")
+        chessboard.movement_handler([6,6], [7,6])
+        assert type(chessboard.board[7][6]) == Knight
+
+    def pawn_attack_to_promotion_test(self):
+        chessboard = self.create_move_into_pawn_promo_board()
+        self.write_seek_new_stdin("bishop\n")
+        chessboard.movement_handler([6,6], [7,7])
+        assert type(chessboard.board[7][7]) == Bishop
 
 

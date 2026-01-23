@@ -392,11 +392,9 @@ class ChessBoard():
         return False
 
     def movement_handler(self, start, end):
-        print("handler",start,end)
         if self.is_valid_castle_movement(start,end):
             self.castle_movement_handler(start,end)
         else:
-            print("statement", start,end)
             self.move(start,end)
         self.pawn_promotion_handler()
         self.board_states.append(self.to_string())
@@ -420,7 +418,7 @@ class ChessBoard():
         return self.pawn_promo_piece(user_in)
 
     def pawn_promo_piece(self, user_in):
-        pawn_promo_piece = {"knight":Knight, "Bishop": Bishop, "king": King, "queen": Queen, "rook": Rook}
+        pawn_promo_piece = {"knight":Knight, "bishop": Bishop, "queen": Queen, "rook": Rook}
         if user_in.lower() not in pawn_promo_piece:
             return None
         return pawn_promo_piece[user_in.lower()]
