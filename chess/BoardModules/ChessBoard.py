@@ -57,7 +57,16 @@ class ChessBoard():
                 else:
                     column_entries.append("--")
             row_entries.append(" | ".join(column_entries))
+        self.add_row_col_indices(row_entries)
         return "\n".join(row_entries)
+
+    def add_row_col_indices(self, row_entries):
+        index_to_letter = {0:"a", 1:"b", 2:"c", 3:"d", 4:"e", 5:"f", 6:"g", 7:"h"}
+        column_indices = ""
+        for i in range(LEN_SIDE):
+            row_entries[i] += f"  {i}" 
+            column_indices += f"{index_to_letter[i]}    "
+        row_entries.append(column_indices)
 
     def is_open_tile(self, coords):
         return self.board[coords[0]][coords[1]] == 0
@@ -114,7 +123,7 @@ class ChessBoard():
     def get_sanitized_coords(self):
         user_in = input()
         while not self.is_sanitary_coords(user_in) and not self.is_sanitary_chess_notation(user_in):
-            user_in = input()
+            user_in = input("previous input was invalid notation, please re-enter: ")
         return self.convert_input_to_coords(user_in)
 
     def is_sanitary_coords(self, user_in):
@@ -148,7 +157,7 @@ class ChessBoard():
         print("coords to move from: ")
         coords = self.get_sanitized_coords()
         while self.coord_is_piece_and_is_color(coords, OPPOSITE_COLOR[color]) or self.is_open_tile(coords) or not self.is_valid_piece_to_move(color, coords):
-            print("coords to move from: ")
+            print("invalid tile, please re-enter: ")
             coords = self.get_sanitized_coords()
         return coords
 
@@ -257,7 +266,7 @@ class ChessBoard():
         print("coords to move to:")
         destination = self.get_sanitized_coords()
         while not self.is_valid_movement(origin, destination):
-            print("coords to move to:")
+            print("input was an invalid movement, please re-enter:")
             destination = self.get_sanitized_coords()
         return destination
 
