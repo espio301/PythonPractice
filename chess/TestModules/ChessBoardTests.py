@@ -132,14 +132,15 @@ class ChessBoardTests:
     def to_string_test(self): #what's the typical way to do multiline things?
         actual = ChessBoard().to_string()
         expected =   \
-"""br | bk | bb | bQ | bK | bb | bk | br
-bp | bp | bp | bp | bp | bp | bp | bp
--- | -- | -- | -- | -- | -- | -- | --
--- | -- | -- | -- | -- | -- | -- | --
--- | -- | -- | -- | -- | -- | -- | --
--- | -- | -- | -- | -- | -- | -- | --
-wp | wp | wp | wp | wp | wp | wp | wp
-wr | wk | wb | wQ | wK | wb | wk | wr"""
+"""br | bk | bb | bQ | bK | bb | bk | br  0
+bp | bp | bp | bp | bp | bp | bp | bp  1
+-- | -- | -- | -- | -- | -- | -- | --  2
+-- | -- | -- | -- | -- | -- | -- | --  3
+-- | -- | -- | -- | -- | -- | -- | --  4
+-- | -- | -- | -- | -- | -- | -- | --  5
+wp | wp | wp | wp | wp | wp | wp | wp  6
+wr | wk | wb | wQ | wK | wb | wk | wr  7
+a    b    c    d    e    f    g    h    """
         assert actual == expected
 
     def coord_is_piece_and_is_color_test(self):
@@ -154,9 +155,9 @@ wr | wk | wb | wQ | wK | wb | wk | wr"""
     def get_sanitized_coords_test(self):
         self.test_correct_coords()
         self.test_correct_chess_notation()
-        self.assert_given_coords_not_sanitizable(",")
-        self.assert_given_coords_not_sanitizable("j,k")
-        self.assert_given_coords_not_sanitizable("00,1")
+        self.silent_run(self.assert_given_coords_not_sanitizable, ",")
+        self.silent_run(self.assert_given_coords_not_sanitizable, "j,k")
+        self.silent_run(self.assert_given_coords_not_sanitizable, "00,1")
 
     def test_correct_coords(self):
         self.write_seek_new_stdin("6,7\n")
