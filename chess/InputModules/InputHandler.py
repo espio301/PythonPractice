@@ -14,27 +14,35 @@ class InputHandler():
     def __init__(self, chessboard : BoardModules):
         self.chessboard = chessboard
 
-    #input
+    def get_movement_coords(self, color):
+        while True:
+            move_from = self.get_user_piece_to_move(color)
+            move_to = self.get_user_move_to_coords(move_from)
+            print(move_from,move_to)
+            if move_to == "x":
+                continue
+            return [move_from,move_to]
+
+
     def is_sanitary_digit(self, digit):
         if not digit.isdigit() or int(digit) < 0 or int(digit) >= LEN_SIDE:
             return False
         return True
 
-    #input
     def get_user_input(self, prompt):
         return input(prompt)
 
-    #input
     def get_sanitized_coords(self):
         user_in = input()
-        while not self.is_sanitary_coords(user_in) and not self.is_sanitary_chess_notation(user_in):
+        while (not self.is_sanitary_coords(user_in) and not self.is_sanitary_chess_notation(user_in)) or user_in == "x":
+            if user_in == "x":
+                return "x"
             user_in = input("previous input was invalid notation, please re-enter: ")
         return self.convert_input_to_coords(user_in)
 
     def is_sanitary_coords(self, user_in):
         return len(user_in) == 3 and self.is_sanitary_digit(user_in[0]) and user_in[1] == "," and self.is_sanitary_digit(user_in[2])
 
-    #input
     def is_sanitary_chess_notation(self, user_in):
         if len(user_in) == 2:
             letter = user_in[0].lower()
@@ -42,11 +50,9 @@ class InputHandler():
             return self.letter_and_number_within_bounds(letter, number)
         return False
 
-    #input 
     def letter_and_number_within_bounds(self, letter, number):
         return letter >= 'a' and letter <= 'h' and number.isdigit() and int(number) <= LEN_SIDE and int(number) >= 1
 
-    #input
     def convert_input_to_coords(self, user_in):
         if len(user_in) == 2:
             user_in = self.convert_chess_notation_to_standard_input(user_in)
@@ -61,32 +67,28 @@ class InputHandler():
         number = int(user_in[1])
         return f"{LEN_SIDE - number},{CHESS_NOTATION_LETTER_CONVERTER[letter]}"
 
-    #input
     def get_user_piece_to_move(self, color):
         print("coords to move from: ")
         coords = self.get_sanitized_coords()
-        while self.chessboard.coord_is_piece_and_is_color(coords, OPPOSITE_COLOR[color]) or self.chessboard.is_open_tile(coords) or not self.is_valid_piece_to_move(color, coords):
+        while coords == "x" or self.chessboard.coord_is_piece_and_is_color(coords, OPPOSITE_COLOR[color]) or self.chessboard.is_open_tile(coords) or not self.is_valid_piece_to_move(color, coords):
             print("invalid tile, please re-enter: ")
             coords = self.get_sanitized_coords()
         return coords
 
-    #input
     def get_user_move_to_coords(self, origin):
         print("coords to move to:")
         destination = self.get_sanitized_coords()
-        while not self.chessboard.is_valid_movement(origin, destination):
+        while destination == "x" or not self.chessboard.is_valid_movement(origin, destination):
+            if destination == "x":
+                return "x"
             print("input was an invalid movement, please re-enter:")
             destination = self.get_sanitized_coords()
         return destination
 
 
-    #input
     def is_valid_piece_to_move(self, color, coords): #TODO should return True if the piece can block the king from check
         return not self.chessboard.is_color_in_check(color) or isinstance(self.chessboard.board[coords[0]][coords[1]], King) or self.chessboard.piece_can_uncheck_king(coords)
 
-    #input
-
-    #input
     def get_user_pawn_promo_input(self):
         user_in = input("please input what you'd like to promote the pawn to")
         while not self.pawn_promo_piece(user_in):

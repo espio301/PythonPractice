@@ -141,7 +141,7 @@ class ChessBoard():
     def is_valid_movement(self, origin, end):
         origin_piece = self.board[origin[0]][origin[1]]
         origin_color = origin_piece.get_color()
-        if self.is_coord_is_out_of_bounds(end) or  self.is_banned_pawn_exception(origin,end) or self.is_piece_in_the_way(origin,end):
+        if self.is_coord_is_out_of_bounds(end) or self.is_banned_pawn_exception(origin,end) or self.is_piece_in_the_way(origin,end):
             return False
         if not self.coord_is_piece_and_is_color(end, origin_color) and origin_piece.is_valid_move_pattern(end) and self.is_legal_move_via_checked_state(origin, end) or self.is_valid_castle_movement(origin,end):
             return True
@@ -368,20 +368,16 @@ class ChessBoard():
 
     def run_movement_handling(self, moving_color):
         handler = InputModule.InputHandler(self)
-        move_from = handler.get_user_piece_to_move(moving_color)
-        move_to = handler.get_user_move_to_coords(move_from)
-        self.movement_handler(move_from, move_to)
+        from_to_coords = handler.get_movement_coords(moving_color)
+        self.movement_handler(from_to_coords[0], from_to_coords[1])
 
     def game_loop(self):
         players = ["white", "black"]
-        print("please enter coordinates in the form row,column")
+        print("please enter coordinates in the form row,column, enter x to restart your input")
         while not self.game_is_over:
             print(self.to_string())
             color_to_move = players[self.turn_count%2]
             print(f"{color_to_move} to move")
-#            move_from_coords = self.get_user_piece_to_move(color_to_move)
-#            move_to_coords = self.get_user_move_to_coords(move_from_coords)
-#            self.movement_handler(move_from_coords, move_to_coords)
             self.run_movement_handling(color_to_move)
             print("turn_count",self.turn_count)
             self.check_and_execute_win_state()
