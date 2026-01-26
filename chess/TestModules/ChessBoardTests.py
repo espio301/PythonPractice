@@ -23,14 +23,13 @@ class ChessBoardTests:
         self.is_open_tile_test()
         self.to_string_test()
         self.coord_is_piece_and_is_color_test()
-        self.convert_input_to_coords_test()
-        self.get_sanitized_coords_test()
-        self.get_user_piece_to_move_test()
-        self.is_moving_non_king_in_check_test()
+        #self.convert_input_to_coords_test()
+        #self.get_sanitized_coords_test()
+        #self.get_user_piece_to_move_test()
+        #self.is_moving_non_king_in_check_test()
         self.is_valid_movement_test()
         self.is_piece_in_the_way_test()
         self.get_step_direction_test()
-        self.get_user_move_to_coords_test()
         self.move_test()
         self.get_delta_two_points_test()
         self.is_color_in_check_test()
@@ -92,6 +91,7 @@ class ChessBoardTests:
     def create_move_into_pawn_promo_board(self):
         return TestHelpers().create_board_from_pieces([King("white", [7,0]), King("black", [0,0]), Pawn("white", [1,6]), Pawn("black", [6,6]), Knight("white", [7,7])])
 
+    #TODO refactor these to the helper class
     def write_seek_new_stdin(self, write_string):
         sys.stdin = StringIO()
         sys.stdin.write(write_string)
@@ -132,14 +132,14 @@ class ChessBoardTests:
     def to_string_test(self): #what's the typical way to do multiline things?
         actual = ChessBoard().to_string()
         expected =   \
-"""br | bk | bb | bQ | bK | bb | bk | br  0
-bp | bp | bp | bp | bp | bp | bp | bp  1
--- | -- | -- | -- | -- | -- | -- | --  2
--- | -- | -- | -- | -- | -- | -- | --  3
--- | -- | -- | -- | -- | -- | -- | --  4
+"""br | bk | bb | bQ | bK | bb | bk | br  8
+bp | bp | bp | bp | bp | bp | bp | bp  7
+-- | -- | -- | -- | -- | -- | -- | --  6
 -- | -- | -- | -- | -- | -- | -- | --  5
-wp | wp | wp | wp | wp | wp | wp | wp  6
-wr | wk | wb | wQ | wK | wb | wk | wr  7
+-- | -- | -- | -- | -- | -- | -- | --  4
+-- | -- | -- | -- | -- | -- | -- | --  3
+wp | wp | wp | wp | wp | wp | wp | wp  2
+wr | wk | wb | wQ | wK | wb | wk | wr  1
 a    b    c    d    e    f    g    h    """
         assert actual == expected
 
@@ -148,59 +148,6 @@ a    b    c    d    e    f    g    h    """
         correct_colored_coords_give_true = ChessBoard().coord_is_piece_and_is_color([0,0], "black") and ChessBoard().coord_is_piece_and_is_color([7,7], "white")
         is_piece_incorrect_color_gives_false = ChessBoard().coord_is_piece_and_is_color([0,0],"white") == False and ChessBoard().coord_is_piece_and_is_color([7,7],"black") == False
         assert empty_coords_give_false and correct_colored_coords_give_true and is_piece_incorrect_color_gives_false
-
-    def convert_input_to_coords_test(self):
-        assert ChessBoard().convert_input_to_coords("6,7") == [6,7]
-
-    def get_sanitized_coords_test(self):
-        self.test_correct_coords()
-        self.test_correct_chess_notation()
-        self.silent_run(self.assert_given_coords_not_sanitizable, ",")
-        self.silent_run(self.assert_given_coords_not_sanitizable, "j,k")
-        self.silent_run(self.assert_given_coords_not_sanitizable, "00,1")
-
-    def test_correct_coords(self):
-        self.write_seek_new_stdin("6,7\n")
-        assert ChessBoard().get_sanitized_coords() == [6,7]
-    
-    def test_correct_chess_notation(self):
-        self.write_seek_new_stdin("b4\n") #goated opening
-        assert ChessBoard().get_sanitized_coords() == [4,1]
-
-    def assert_given_coords_not_sanitizable(self, unsanitizable_string):
-        self.write_seek_new_stdin(f"{unsanitizable_string}\n6,7\n")
-        assert ChessBoard().get_sanitized_coords() == [6,7]
-
-    def get_user_piece_to_move_test(self):
-        self.silent_run(self.check_correct_piece_to_move)
-        self.silent_run(self.check_user_moves_not_a_piece)
-        self.silent_run(self.check_user_moves_other_player_piece)
-        self.silent_run(self.check_user_tries_moving_in_check)
-        
-    def check_correct_piece_to_move(self):
-        self.write_seek_new_stdin("0,0\n")
-        blacks_move = ChessBoard().get_user_piece_to_move("black")
-        self.write_seek_new_stdin("7,7\n")
-        white_move = ChessBoard().get_user_piece_to_move("white")
-        assert white_move == [7,7] and blacks_move == [0,0]
-
-    def check_user_moves_not_a_piece(self):
-        self.write_seek_new_stdin("4,4\n0,0\n")
-        incorret_move_first = ChessBoard().get_user_piece_to_move("black")
-        assert incorret_move_first == [0,0]
-
-    def check_user_moves_other_player_piece(self):
-        self.write_seek_new_stdin("7,7\n0,0\n")
-        incorret_move_first = ChessBoard().get_user_piece_to_move("black")
-        assert incorret_move_first == [0,0]
-    
-    def check_user_tries_moving_in_check(self):
-        chessboard = self.create_board_white_in_check()
-        self.write_seek_new_stdin("7,7\n7,0\n")
-        assert chessboard.get_user_piece_to_move("white") == [7,0]
-
-    def is_moving_non_king_in_check_test(self):
-        self.silent_run(self.check_user_tries_moving_in_check) #leaving this here for consistency of my testing and in future it may want to be done more thoroughly (feel free to tell me to delete this though, I'm only leaving this comment in case a coach wants to course correct this thought process)
 
     def is_valid_movement_test(self):
         self.test_valid_movements()
@@ -236,24 +183,6 @@ a    b    c    d    e    f    g    h    """
         negative_step_works = ChessBoard().get_step_direction([3,3], [2,3]) == [-1,0]
         assert diagonal_step_works and negative_step_works
 
-    def get_user_move_to_coords_test(self):
-        self.assert_valid_user_move_to_check()
-        self.assert_in_the_way_user_move_to_check()
-        self.assert_invalid_user_move_to_check()
-
-    def assert_valid_user_move_to_check(self):
-        self.write_seek_new_stdin("5,0\n")
-        assert self.silent_run(ChessBoard().get_user_move_to_coords, [6,0]) == [5,0]
-
-    def assert_in_the_way_user_move_to_check(self):
-        self.write_seek_new_stdin("0,0\n6,0\n")
-        chessboard = self.create_pawn_in_way_of_rook()
-        assert self.silent_run(chessboard.get_user_move_to_coords, [7,0]) == [6,0]
-
-    def assert_invalid_user_move_to_check(self):
-        self.write_seek_new_stdin("6,1\n6,0\n")
-        chessboard = self.create_pawn_in_way_of_rook()
-        assert self.silent_run(chessboard.get_user_move_to_coords, [7,0]) == [6,0]
 
     def move_test(self):
         chessboard = ChessBoard()
@@ -410,3 +339,53 @@ a    b    c    d    e    f    g    h    """
         assert type(chessboard.board[7][7]) == Bishop
 
 
+    #def convert_input_to_coords_test(self):
+    #    assert ChessBoard().convert_input_to_coords("6,7") == [6,7]
+
+"""    def get_sanitized_coords_test(self):
+        self.test_correct_coords()
+        self.test_correct_chess_notation()
+        self.silent_run(self.assert_given_coords_not_sanitizable, ",")
+        self.silent_run(self.assert_given_coords_not_sanitizable, "j,k")
+        self.silent_run(self.assert_given_coords_not_sanitizable, "00,1")
+
+    def test_correct_coords(self):
+        self.write_seek_new_stdin("6,7\n")
+        assert ChessBoard().get_sanitized_coords() == [6,7]
+    
+    def test_correct_chess_notation(self):
+        self.write_seek_new_stdin("b4\n") #goated opening
+        assert ChessBoard().get_sanitized_coords() == [4,1]
+
+    def assert_given_coords_not_sanitizable(self, unsanitizable_string):
+        self.write_seek_new_stdin(f"{unsanitizable_string}\n6,7\n")
+        assert ChessBoard().get_sanitized_coords() == [6,7]
+"""
+"""    def get_user_piece_to_move_test(self):
+        self.silent_run(self.check_correct_piece_to_move)
+        self.silent_run(self.check_user_moves_not_a_piece)
+        self.silent_run(self.check_user_moves_other_player_piece)
+        self.silent_run(self.check_user_tries_moving_in_check)
+        
+    def check_correct_piece_to_move(self):
+        self.write_seek_new_stdin("0,0\n")
+        blacks_move = ChessBoard().get_user_piece_to_move("black")
+        self.write_seek_new_stdin("7,7\n")
+        white_move = ChessBoard().get_user_piece_to_move("white")
+        assert white_move == [7,7] and blacks_move == [0,0]
+
+    def check_user_moves_not_a_piece(self):
+        self.write_seek_new_stdin("4,4\n0,0\n")
+        incorret_move_first = ChessBoard().get_user_piece_to_move("black")
+        assert incorret_move_first == [0,0]
+
+    def check_user_moves_other_player_piece(self):
+        self.write_seek_new_stdin("7,7\n0,0\n")
+        incorret_move_first = ChessBoard().get_user_piece_to_move("black")
+        assert incorret_move_first == [0,0]
+    
+    def check_user_tries_moving_in_check(self):
+        chessboard = self.create_board_white_in_check()
+        self.write_seek_new_stdin("7,7\n7,0\n")
+        assert chessboard.get_user_piece_to_move("white") == [7,0]
+"""

@@ -1,3 +1,4 @@
+from TestModules.InputHandlerTests import InputHandlerTests
 from TestModules.RookTests import RookTests
 from TestModules.QueenTests import QueenTests
 from TestModules.PawnTests import PawnTests
@@ -18,6 +19,7 @@ def run_unit_tests():
     king_test_obj = KingTests()
     bishop_test_obj = BishopTests()
     chess_board_tests_obj = ChessBoardTests()
+    input_tests_obj = InputHandlerTests()
 
     rook_test_obj.run_all()
     queen_test_obj.run_all()
@@ -27,6 +29,8 @@ def run_unit_tests():
     king_test_obj.run_all()
     bishop_test_obj.run_all()
     chess_board_tests_obj.run_all()
+    input_tests_obj.run_all()
+
     print("finished with unit tests")
 
 run_unit_tests()
