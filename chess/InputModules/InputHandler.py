@@ -5,33 +5,48 @@ from PieceModules.Queen import Queen
 from PieceModules.King import King
 from PieceModules.Pawn import Pawn
 
+#how better should I have gone about special code handling
+
 LEN_SIDE = 8
 OPPOSITE_COLOR = {"white":"black", "black":"white"}
 CHESS_NOTATION_LETTER_CONVERTER = {"a":0, "b":1, "c":2, "d":3, "e":4, "f":5, "g":6, "h":7}
+SPECIAL_CODES = {"cancel", "cnotation", "ftnotation"}
 
 class InputHandler():
     def __init__(self, chessboard : 'BoardModules.ChessBoard'):
         self.chessboard = chessboard
-        user_in = input("enter y to enter chess notation mode, n for regular: ")
-        self.notation_mode = user_in == "y"
+        self.notation_mode = True
 
     def get_movement_coords(self, color):
-        if self.notation_mode:
-            return self.get_notation_coords(color)
-        else:
-            return self.get_from_to_coords(color)
-
-    def get_notation_coords(self,color):
-        user_in = self.get_sanitary_notation_in()
-        return self.algebraic_notation_converter(user_in, color)
+        while True:
+            print(self.notation_mode)
+            coords = []
+            if self.notation_mode:
+                coords = self.get_notation_coords(color)
+            else:
+                coords = self.get_from_to_coords(color)
+            print(coords)
+            if isinstance(coords[0], str) or isinstance(coords[1],str):
+                self.special_code_handler(coords)
+                continue
+            return coords
 
     def get_from_to_coords(self,color):
-        while True:
+        while self.notation_mode == False:
             move_from = self.get_user_piece_to_move(color)
+            if isinstance(move_from,str):
+                return [move_from]
             move_to = self.get_user_move_to_coords(move_from)
-            if move_to == "x":
-                continue
             return [move_from,move_to]
+
+    def special_code_handler(self,codes):
+        for code in codes:
+            if code == "cancel":
+                return
+            if code == "cnotation":
+                self.notation_mode = True
+            if code == "ftnotation":
+                self.notation_mode = False
 
     def is_sanitary_digit(self, digit):
         if not digit.isdigit() or int(digit) < 0 or int(digit) >= LEN_SIDE:
@@ -44,8 +59,9 @@ class InputHandler():
     def get_sanitized_coords(self):
         user_in = input()
         while (not self.is_sanitary_coords(user_in) and not self.is_sanitary_notation_tile(user_in)) or user_in == "x":
-            if user_in == "x":
-                return "x"
+            print(user_in, user_in)
+            if user_in in SPECIAL_CODES:
+                return user_in
             user_in = input("previous input was invalid notation, please re-enter: ")
         return self.convert_input_to_coords(user_in)
 
@@ -78,21 +94,26 @@ class InputHandler():
 
     def get_user_piece_to_move(self, color):
         print("coords to move from: ")
-        coords = self.get_sanitized_coords()
-        while coords == "x" or self.chessboard.coord_is_piece_and_is_color(coords, OPPOSITE_COLOR[color]) or self.chessboard.is_open_tile(coords) or not self.is_valid_piece_to_move(color, coords):
-            print("invalid tile, please re-enter: ")
+        while True:
             coords = self.get_sanitized_coords()
-        return coords
+            if isinstance(coords,str):
+                return coords
+            if self.chessboard.coord_is_piece_and_is_color(coords, OPPOSITE_COLOR[color]) or self.chessboard.is_open_tile(coords) or not self.is_valid_piece_to_move(color, coords):
+                print("invalid tile, please re-enter: ")
+            else:
+                return coords
 
     def get_user_move_to_coords(self, origin):
         print("coords to move to:")
-        destination = self.get_sanitized_coords()
-        while destination == "x" or not self.chessboard.is_valid_movement(origin, destination):
-            if destination == "x":
-                return "x"
-            print("input was an invalid movement, please re-enter:")
+        while True:
             destination = self.get_sanitized_coords()
-        return destination
+
+            if isinstance(destination, str):
+                return destination
+            if not self.chessboard.is_valid_movement(origin, destination):
+                print("input was an invalid movement, please re-enter:")
+            else:
+                return destination
 
     def is_valid_piece_to_move(self, color, coords):
         return not self.chessboard.is_color_in_check(color) or isinstance(self.chessboard.board[coords[0]][coords[1]], King) or self.chessboard.piece_can_uncheck_king(coords)
@@ -111,21 +132,21 @@ class InputHandler():
 
     def get_notation_coords(self,color):
         user_in = self.get_notation_input()
+        if user_in in SPECIAL_CODES:
+            return [user_in]
         return self.decode_chess_notation(user_in, color)
         
 
     def get_notation_input(self):
         while True:
             user_in = input("input chess notation move: ")
+            if user_in in SPECIAL_CODES:
+                return user_in
             if len(user_in) < 2:
                 continue
             if 'x' in user_in:
                 user_in.replace("x", "")
             return user_in
-
-    def algebraic_notation_handler(self):
-        user_in = self.get_notation_input()
-        piece = self.decode_chess_notation(user_in)
 
     def decode_chess_notation(self, user_in, color):
         pieces = {"R":Rook, "N":Knight, "B":Bishop, "Q":Queen, "K":King}
@@ -150,31 +171,36 @@ class InputHandler():
         for piece in all_pieces:
             if isinstance(piece, piece_type):
                 correct_types.append(piece)
-
+        #print(all_pieces)
+        #print(correct_types)
         for piece in correct_types:
-            print(piece.get_coords(),end_coords)
+            #print("here")
+            #print(piece.get_coords(),end_coords)
             if self.chessboard.is_valid_movement(piece.get_coords(),end_coords):
                 valid_movement_pieces.append(piece)
-
-        disambig_int = 0
-        disambig_is_row = disambiguator.isdigit()
-        disambig_index = 1
-        if disambig_is_row:
-            disambig_index = 0
-        if disambiguator.isdigit():
-            disambig_int = int(disambiguator)
-        else:
-            disambig_int = CHESS_NOTATION_LETTER_CONVERTER[disambiguator]
+        #print(valid_movement_pieces)
+        if disambiguator != None:
+            disambig_int = 0
+            disambig_is_row = disambiguator.isdigit()
+            disambig_index = 1
+            if disambig_is_row:
+                disambig_index = 0
+            if disambiguator.isdigit():
+                disambig_int = int(disambiguator)
+            else:
+                disambig_int = CHESS_NOTATION_LETTER_CONVERTER[disambiguator]
         
-        for piece in valid_movement_pieces:
-            pce_coords = piece.get_coords()
-            if pce_coords[disambig_index] == disambig_int:
-                print(piece_type, disambiguator, end, color)
-                print(pce_coords, end_coords)
-                return [pce_coords,end_coords]
-        print(piece_type, disambiguator, end, color)
-        print(pce_coords, end_coords)
+            for piece in valid_movement_pieces:
+                pce_coords = piece.get_coords()
+                if pce_coords[disambig_index] == disambig_int:
+                    #print(piece_type, disambiguator, end, color)
+                    #print(pce_coords, end_coords)
+                    return [pce_coords,end_coords]
+            #print(piece_type, disambiguator, end, color)
+            #print(pce_coords, end_coords)
+        
+        if len(valid_movement_pieces) > 1 and disambiguator == None:
+            raise Exception("some impossible move happened")
+        print([valid_movement_pieces[0].get_coords(), end_coords])
+        return [valid_movement_pieces[0].get_coords(), end_coords]
 
-        raise Exception("some impossible move happened")
-
-#InputHandler(BoardModules.Chessboard()).algebraic_notation_handler()

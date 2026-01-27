@@ -28,6 +28,7 @@ class ChessBoard():
         self.turn_count = 0
         self.game_is_over = False
         self.board_states = []
+        self.input_handler = InputModule.InputHandler(self)
 
 
     def create_initial_board(self):
@@ -130,7 +131,6 @@ class ChessBoard():
             dummy_board.move(start_coord, end_coord)
         return dummy_board.is_color_in_check(color)
 
-
     def is_valid_movement(self, origin, end):
         origin_piece = self.board[origin[0]][origin[1]]
         origin_color = origin_piece.get_color()
@@ -188,7 +188,7 @@ class ChessBoard():
 
         cur_coords = [origin[0] + direction[0], origin[1] + direction[1]]
         while cur_coords != destination:
-            if self.board[cur_coords[0]][cur_coords[1]] != 0:
+            if  self.is_coord_is_out_of_bounds(cur_coords) or self.board[cur_coords[0]][cur_coords[1]] != 0:
                 return True
             cur_coords = [cur_coords[0] + direction[0], cur_coords[1] + direction[1]]
         return False
@@ -347,7 +347,7 @@ class ChessBoard():
             color = piece.get_color()
             coords = piece.get_coords()
             if (color == "white" and coords[0] == 0) or (color == "black" and coords[0] == 7):
-                piece_type = InputModule.InputHandler(self).get_user_pawn_promo_input()
+                piece_type = self.input_handler.get_user_pawn_promo_input()
                 piece = piece_type(color, [0,0])
                 self.board[coords[0]][coords[1]] = piece
                 piece.set_coords(coords)
@@ -360,8 +360,7 @@ class ChessBoard():
         self.move(end,rook_end)
 
     def run_movement_handling(self, moving_color):
-        handler = InputModule.InputHandler(self)
-        from_to_coords = handler.get_movement_coords(moving_color)
+        from_to_coords = self.input_handler.get_movement_coords(moving_color)
         self.movement_handler(from_to_coords[0], from_to_coords[1])
 
     def game_loop(self):
@@ -378,4 +377,4 @@ class ChessBoard():
 
 if __name__ == "__main__":
     board = ChessBoard()
-    board.run_movement_handling("white")
+    board.game_loop()
