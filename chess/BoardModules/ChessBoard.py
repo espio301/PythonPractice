@@ -9,13 +9,6 @@ from PieceModules.Piece import Piece
 import InputModules.InputHandler as InputModule
 from typing import Type
 
-#TODO would take too much time right now, but would've been nice to do a get_tile function with [r,c]
-#TODO pawn can transform to whatever Piece if it reaches the end
-#TODO I'm not going to worry about stalemate rules at the moment
-#checkmate has a lot of rules, I sort of wonder if its deserving to be a different class for readability or if theres something better to help this. maybe a board class and a game_loop/game_mechanics class would've made this more readable
-#TODO have to make it impossible to move yourself into check
-#TODO Castling
-#TODO it should be ok to move another piece than the king if it puts the king out of check
 #fastest check mate is 6,5 5,5  1,4 3,4     6,6 4,6     0,3 4,7
 
 
@@ -385,4 +378,4 @@ class ChessBoard():
 
 if __name__ == "__main__":
     board = ChessBoard()
-    board.game_loop()
+    board.run_movement_handling("white")
