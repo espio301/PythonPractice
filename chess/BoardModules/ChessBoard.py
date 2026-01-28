@@ -28,6 +28,7 @@ class ChessBoard():
         self.turn_count = 0
         self.game_is_over = False
         self.board_states = []
+        self.move_history = []
         self.input_handler = InputModule.InputHandler(self)
 
 
@@ -134,7 +135,7 @@ class ChessBoard():
     def is_valid_movement(self, origin, end):
         origin_piece = self.board[origin[0]][origin[1]]
         origin_color = origin_piece.get_color()
-        if self.is_coord_is_out_of_bounds(end) or self.is_banned_pawn_exception(origin,end) or self.is_piece_in_the_way(origin,end):
+        if self.is_coord_is_out_of_bounds(end) or self.is_banned_pawn_movement(origin,end) or self.is_piece_in_the_way(origin,end):
             return False
         if not self.coord_is_piece_and_is_color(end, origin_color) and origin_piece.is_valid_move_pattern(end) and self.is_legal_move_via_checked_state(origin, end) or self.is_valid_castle_movement(origin,end):
             return True
@@ -169,16 +170,34 @@ class ChessBoard():
                 return False
         return True
 
-    def is_banned_pawn_exception(self, origin, end): #returns true if is an allowable exception, false otherwise
+    def is_banned_pawn_movement(self, origin, end):
         delta = self.get_delta_two_points(origin, end)
         piece = self.board[origin[0]][origin[1]]
         if not isinstance(piece, Pawn):
+            return False
+        if self.is_en_passant(origin,end):
             return False
         if delta in piece.get_exception_patterns() and not self.coord_is_piece_and_is_color(end, OPPOSITE_COLOR[piece.get_color()]):
             return True
         if delta in [[1,0],[-1,0]] and self.board[end[0]][end[1]] != 0:
             return True
         return False
+
+    def is_en_passant(self, origin, end):
+        if len(self.move_history) == 0:
+            return False
+        piece = self.board[origin[0]][origin[1]]
+        color = piece.get_color()
+        enemy_pawn = self.board[origin[0]][end[1]]
+        print(self.move_history)
+        prev_move = self.move_history[-1]
+        delta_prev_move = self.get_delta_two_points(prev_move[1], prev_move[2])
+        #enemy_moved_prev_turn = self.move_history[0] == enemy_pawn
+        if piece.get_ranks_moved() == 3 and abs(delta_prev_move[0]) == 2 and prev_move[0] == enemy_pawn:
+            print("succeed in en passant")
+            return True
+        return False
+    #e4 a5 e5 d5 d6
 
     def is_piece_in_the_way(self, origin, destination):
         direction = self.get_step_direction(origin, destination)
@@ -338,6 +357,10 @@ class ChessBoard():
             self.castle_movement_handler(start,end)
         else:
             self.move(start,end)
+            if self.is_en_passant:
+                print("start and end:")
+                print(start[0],end[0])
+                self.board[start[0]][end[1]] = 0
         self.pawn_promotion_handler()
         self.board_states.append(self.to_string())
 
@@ -362,6 +385,13 @@ class ChessBoard():
     def run_movement_handling(self, moving_color):
         from_to_coords = self.input_handler.get_movement_coords(moving_color)
         self.movement_handler(from_to_coords[0], from_to_coords[1])
+        self.add_move_history(from_to_coords)
+
+    def add_move_history(self, from_to_coords):
+        start = from_to_coords[0]
+        end = from_to_coords[1]
+        piece = self.board[end[0]][end[1]]
+        self.move_history.append([piece,start,end])
 
     def game_loop(self):
         players = ["white", "black"]
