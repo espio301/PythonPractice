@@ -196,7 +196,11 @@ class ChessBoard():
     def is_en_passant(self, origin, end):
         piece = self.board[origin[0]][origin[1]]
         enemy_pawn = self.board[origin[0]][end[1]]
-        if not isinstance(piece, Pawn) or not isinstance(enemy_pawn,Pawn):
+        if isinstance(piece, Pawn):
+            print("checking en passant piece instances:", isinstance(piece, Pawn), isinstance(enemy_pawn,Pawn), piece.is_valid_move_pattern(end), origin, end)
+        else:
+            print("checking en passant piece instances:", isinstance(piece, Pawn), isinstance(enemy_pawn,Pawn), origin, end)
+        if not isinstance(piece, Pawn) or not isinstance(enemy_pawn,Pawn) or not piece.is_valid_move_pattern(end):
             return False
         print("en passanting")
         if len(self.move_history) == 0:
@@ -374,7 +378,7 @@ class ChessBoard():
                 self.board[start[0]][end[1]] = 0
         self.pawn_promotion_handler()
         self.board_states.append(self.to_string())
-
+#
     def pawn_promotion_handler(self):
         all_pieces = self.get_pieces_for_color("white") + self.get_pieces_for_color("black")
         for piece in all_pieces:

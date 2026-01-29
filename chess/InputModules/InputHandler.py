@@ -11,11 +11,12 @@ LEN_SIDE = 8
 OPPOSITE_COLOR = {"white":"black", "black":"white"}
 CHESS_NOTATION_LETTER_CONVERTER = {"a":0, "b":1, "c":2, "d":3, "e":4, "f":5, "g":6, "h":7}
 SPECIAL_CODES = {"cancel", "cnotation", "ftnotation"}
-
+CHESS_NOTATION_TO_TYPE = {"R":Rook, "N":Knight, "B":Bishop, "Q":Queen, "K":King}
 class InputHandler():
     def __init__(self, chessboard : 'BoardModules.ChessBoard'):
         self.chessboard = chessboard
         self.notation_mode = True
+        self.pawn_promo_type = None
 
     def get_movement_coords(self, color):
         while True:
@@ -119,10 +120,17 @@ class InputHandler():
         return not self.chessboard.is_color_in_check(color) or isinstance(self.chessboard.board[coords[0]][coords[1]], King) or self.chessboard.piece_can_uncheck_king(coords)
 
     def get_user_pawn_promo_input(self):
+        if self.notation_mode:
+            return self.get_notation_promo_piece()
         user_in = input("please input what you'd like to promote the pawn to")
         while not self.pawn_promo_piece(user_in):
             user_in = input("please input what you'd like to promote the pawn to")
         return self.pawn_promo_piece(user_in)
+
+    def get_notation_promo_piece(self):
+        promo_piece = self.pawn_promo_type
+        self.pawn_promo_type = None
+        return promo_piece
 
     def pawn_promo_piece(self, user_in):
         pawn_promo_piece = {"knight": Knight, "bishop": Bishop, "queen": Queen, "rook": Rook}
@@ -141,7 +149,6 @@ class InputHandler():
                 print("invalid entry, please re-enter")
                 continue
             return coords
-        
 
     def get_notation_input(self):
         while True:
@@ -157,19 +164,46 @@ class InputHandler():
     def decode_chess_notation(self, user_in, color):
         if user_in == "0-0" or user_in == "0-0-0":
             return self.algebraic_castling_converter(user_in, color)
-
+        print("decode_chess_notation statement: ","=" in user_in, (self.is_pawn(user_in) and self.is_at_end(user_in)))
+        if "=" in user_in or (self.is_pawn(user_in) and self.is_at_end(user_in)):
+            if not self.is_sanitary_promo_notation(user_in):
+                return None
+            user_in = self.set_pawn_promo_type(user_in)
+            print("decode_chess_notation 1:", self.pawn_promo_type)
         pieces = {"R":Rook, "N":Knight, "B":Bishop, "Q":Queen, "K":King}
         piece = user_in[0].upper()
+        piece_type = None
         disambiguator = None
         if len(user_in) == 2:
             return self.algebraic_notation_converter(Pawn, None, user_in, color)
         if piece not in pieces:
-            piece = Pawn
+            piece_type = Pawn
             disambiguator = user_in[0]
+        else:
+            piece_type = pieces[piece]
         if len(user_in) > 3:
             disambiguator = user_in[1]
-        return self.algebraic_notation_converter(pieces[piece], disambiguator, user_in[len(user_in) - 2:], color)
+        return self.algebraic_notation_converter(piece_type, disambiguator, user_in[len(user_in) - 2:], color)
 
+    def set_pawn_promo_type(self, user_in):
+        pieces = {"R":Rook, "N":Knight, "B":Bishop, "Q":Queen, "K":King}
+        letter = user_in.split('=')[1]
+        move = user_in.split('=')[0]
+        self.pawn_promo_type = pieces[letter]
+        return move
+
+    def is_sanitary_promo_notation(self, user_in):
+        print("is_sanitary_promo_notation: ", user_in)
+        promo_input = user_in.split('=')[1]
+        move_input = user_in.split('=')[0]
+        print("is_sanitary_promo_notation: ", promo_input in CHESS_NOTATION_TO_TYPE, self.is_at_end(move_input), self.is_pawn(move_input))
+        return promo_input in CHESS_NOTATION_TO_TYPE and self.is_at_end(move_input) and self.is_pawn(move_input)
+
+    def is_at_end(self, user_in):
+        return '1' in user_in or '8' in user_in
+
+    def is_pawn(self, user_in):
+        return user_in[0].upper() not in CHESS_NOTATION_TO_TYPE
 
     def algebraic_castling_converter(self, user_in, color):
         castle_coords = {"0-0-0": [0,0], "0-0": [0,7]}
@@ -182,6 +216,7 @@ class InputHandler():
         return [king_coord,castle_coord]
 
     def algebraic_notation_converter(self, piece_type, disambiguator, end, color):
+        print("algebraic_notation_converter:", piece_type, disambiguator, end, color)
         all_pieces = self.chessboard.get_pieces_for_color(color)
         correct_types = []
         valid_movement_pieces = []
@@ -189,16 +224,16 @@ class InputHandler():
         for piece in all_pieces:
             if isinstance(piece, piece_type):
                 correct_types.append(piece)
-        #print(all_pieces)
-        #print(correct_types)
+        print(all_pieces)
+        print(correct_types)
         for piece in correct_types:
-            #print("here")
-            #print(piece.get_coords(),end_coords)
+            print("here")
+            print(piece.get_coords(),end_coords)
             if self.chessboard.is_valid_movement(piece.get_coords(),end_coords):
                 valid_movement_pieces.append(piece)
         if len(valid_movement_pieces) == 0:
             return None
-        #print(valid_movement_pieces)
+        print(valid_movement_pieces)
         if disambiguator != None:
             disambig_int = 0
             disambig_is_row = disambiguator.isdigit()
@@ -209,16 +244,18 @@ class InputHandler():
                 disambig_int = int(disambiguator)
             else:
                 disambig_int = CHESS_NOTATION_LETTER_CONVERTER[disambiguator]
-        
+
             for piece in valid_movement_pieces:
                 pce_coords = piece.get_coords()
                 if pce_coords[disambig_index] == disambig_int:
-                    #print(piece_type, disambiguator, end, color)
-                    #print(pce_coords, end_coords)
+                    print("checking notation converter")
+                    print(piece_type, disambiguator, end, color)
+                    print(pce_coords, end_coords)
                     return [pce_coords,end_coords]
-            #print(piece_type, disambiguator, end, color)
-            #print(pce_coords, end_coords)
-        
+            print("algebraic_notation_converter - vars")
+            print(piece_type, disambiguator, end, color)
+        print("algebraic_notation_converter - vars2" )
+        print(piece_type, disambiguator, end, color)
         if len(valid_movement_pieces) > 1 and disambiguator == None:
             raise Exception("some impossible move happened")
         print([valid_movement_pieces[0].get_coords(), end_coords])
