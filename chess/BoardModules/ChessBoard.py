@@ -252,9 +252,26 @@ class ChessBoard():
         return delta
 
     def is_color_in_checkmate(self, color):
-        if self.is_color_in_check(color) and not self.is_king_of_color_moveable(color):
+        if self.is_color_in_check(color) and not self.is_king_of_color_moveable(color) and not self.is_threat_takeable(color):
             return True
         return False
+
+    def is_threat_takeable(self, color):
+        print("is_threat_takeable: ")
+        pieces = self.get_pieces_for_color(color)
+        threats = self.get_threats_to_king(color)
+        print(pieces, threats)
+        if len(threats) > 2:
+            return False
+        if len(threats) == 0:
+            return True
+        for piece in pieces:
+            start = piece.get_coords()
+            end = threats[0].get_coords()
+            if self.is_valid_movement(start,end):
+                return True
+
+        #check if piece in pieces has valid move to the threat
 
     def is_color_have_valid_moves(self,color):
         colors_pieces = self.get_pieces_for_color(color)
@@ -301,13 +318,17 @@ class ChessBoard():
         return coord[0] < 0 or coord[1] < 0 or coord[0] >= LEN_SIDE or coord[1] >= LEN_SIDE
 
     def is_color_in_check(self, color):
+        return len(self.get_threats_to_king(color)) > 0
+
+    def get_threats_to_king(self, color):
+        threats = []
         enemy_color = OPPOSITE_COLOR[color]
         other_color_pieces = self.get_pieces_for_color(enemy_color)
         king_coords = self.get_king_of_color_coords(color)
         for piece in other_color_pieces:
             if self.piece_can_take_coord(piece, king_coords):
-                return True
-        return False
+                threats.append(piece)
+        return threats
 
     def get_pieces_for_color(self, color):
         pieces = []
