@@ -131,10 +131,16 @@ class InputHandler():
         return pawn_promo_piece[user_in.lower()]
 
     def get_notation_coords(self,color):
-        user_in = self.get_notation_input()
-        if user_in in SPECIAL_CODES:
-            return [user_in]
-        return self.decode_chess_notation(user_in, color)
+        while True:
+            user_in = self.get_notation_input()
+            if user_in in SPECIAL_CODES:
+                return [user_in]
+            coords = self.decode_chess_notation(user_in, color)
+            print("heres coords -", coords)
+            if coords == None or not self.chessboard.is_valid_movement(coords[0], coords[1]):
+                print("invalid entry, please re-enter")
+                continue
+            return coords
         
 
     def get_notation_input(self):
@@ -149,6 +155,9 @@ class InputHandler():
             return user_in
 
     def decode_chess_notation(self, user_in, color):
+        if user_in == "0-0" or user_in == "0-0-0":
+            return self.algebraic_castling_converter(user_in, color)
+
         pieces = {"R":Rook, "N":Knight, "B":Bishop, "Q":Queen, "K":King}
         piece = user_in[0].upper()
         disambiguator = None
@@ -159,9 +168,18 @@ class InputHandler():
             disambiguator = user_in[0]
         if len(user_in) > 3:
             disambiguator = user_in[1]
-        
         return self.algebraic_notation_converter(pieces[piece], disambiguator, user_in[len(user_in) - 2:], color)
 
+
+    def algebraic_castling_converter(self, user_in, color):
+        castle_coords = {"0-0-0": [0,0], "0-0": [0,7]}
+        king_coord = [0,4]
+        castle_coord = castle_coords[user_in]
+        if color == "white":
+            king_coord[0] = 7
+            castle_coord[0] = 7
+        print("returning this:", [king_coord,castle_coord])
+        return [king_coord,castle_coord]
 
     def algebraic_notation_converter(self, piece_type, disambiguator, end, color):
         all_pieces = self.chessboard.get_pieces_for_color(color)
@@ -178,6 +196,8 @@ class InputHandler():
             #print(piece.get_coords(),end_coords)
             if self.chessboard.is_valid_movement(piece.get_coords(),end_coords):
                 valid_movement_pieces.append(piece)
+        if len(valid_movement_pieces) == 0:
+            return None
         #print(valid_movement_pieces)
         if disambiguator != None:
             disambig_int = 0

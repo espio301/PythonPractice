@@ -84,14 +84,16 @@ class ChessBoard():
     def create_initial_king_row(self, color):
         initialized_row = [Rook(color, [0,0]), Knight(color, [0,0]), Bishop(color, [0,0]), Queen(color, [0,0]), King(color, [0,0]), Bishop(color,[0,0]), Knight(color,[0,0]), Rook(color,[0,0])]
         row = 0
-        column = 0
+ #       column = 0
         if color == "white":
             row = LEN_SIDE - 1
-        for piece in initialized_row:
-            piece.set_coords([row, column])
-            column += 1
-        return initialized_row
+ #       for piece in initialized_row:
+ #           piece.set_coords([row, column])
+ #           column += 1
+        return [Rook(color, [row,0]), Knight(color, [row,1]), Bishop(color, [row,2]), Queen(color, [row,3]), King(color, [row,4]), Bishop(color,[row,5]), Knight(color,[row,6]), Rook(color,[row,7])]
+#        return initialized_row
     
+#castling - 
     def create_pawn_row(self, color):
         initialized_row = []
         row = 1
@@ -142,17 +144,25 @@ class ChessBoard():
         return False
 
     def is_valid_castle_movement(self, origin, end):
+        print("checking if valid_castl_movement")
         origin_tile = self.board[origin[0]][origin[1]]
         end_tile = self.board[end[0]][end[1]]
 
+        print(self.to_string())
+        print("checking types and colors")
+        print(not self.is_coords_are_types_and_colors([origin, end], [King,Rook], ["white", "white"]), not self.is_coords_are_types_and_colors([origin, end], [King,Rook], ["black", "black"]))
         if not self.is_coords_are_types_and_colors([origin, end], [King,Rook], ["white", "white"]) and not self.is_coords_are_types_and_colors([origin, end], [King,Rook], ["black", "black"]):
             return False
+        print("checking has moved")
+        print(origin_tile.get_has_moved(), end_tile.get_has_moved())
         if origin_tile.get_has_moved() or end_tile.get_has_moved():
             return False
+        print("correct types and neither have moved")
         king_start = origin
         rook_start = end
         king_end = self.get_king_rook_end_post_castle(end)[0]
         rook_end = self.get_king_rook_end_post_castle(end)[1]
+        print(not self.is_piece_in_the_way(origin,end), not self.is_color_in_check(origin_tile.get_color()), not self.is_color_in_check_post_movements([[king_start, king_end],[rook_start, rook_end]], origin_tile.get_color()))
         if not self.is_piece_in_the_way(origin,end) and not self.is_color_in_check(origin_tile.get_color()) and not self.is_color_in_check_post_movements([[king_start, king_end],[rook_start, rook_end]], origin_tile.get_color()):
                 return True
         return False
@@ -184,15 +194,16 @@ class ChessBoard():
         return False
 
     def is_en_passant(self, origin, end):
+        piece = self.board[origin[0]][origin[1]]
+        enemy_pawn = self.board[origin[0]][end[1]]
+        if not isinstance(piece, Pawn) or not isinstance(enemy_pawn,Pawn):
+            return False
+        print("en passanting")
         if len(self.move_history) == 0:
             return False
-        piece = self.board[origin[0]][origin[1]]
-        color = piece.get_color()
-        enemy_pawn = self.board[origin[0]][end[1]]
-        print(self.move_history)
+
         prev_move = self.move_history[-1]
         delta_prev_move = self.get_delta_two_points(prev_move[1], prev_move[2])
-        #enemy_moved_prev_turn = self.move_history[0] == enemy_pawn
         if piece.get_ranks_moved() == 3 and abs(delta_prev_move[0]) == 2 and prev_move[0] == enemy_pawn:
             print("succeed in en passant")
             return True
@@ -354,10 +365,10 @@ class ChessBoard():
 
     def movement_handler(self, start, end):
         if self.is_valid_castle_movement(start,end):
-            self.castle_movement_handler(start,end)
+            self.castle_movement_handler(start, end)
         else:
             self.move(start,end)
-            if self.is_en_passant:
+            if self.is_en_passant(start,end):
                 print("start and end:")
                 print(start[0],end[0])
                 self.board[start[0]][end[1]] = 0
@@ -376,9 +387,9 @@ class ChessBoard():
                 piece.set_coords(coords)
         return piece
 
-    def castle_movement_handler(self, start,end):
-        king_end = self.get_king_rook_post_castle_coords(start,end)[0]
-        rook_end = self.get_king_rook_post_castle_coords(start,end)[1]
+    def castle_movement_handler(self,start, end):
+        king_end = self.get_king_rook_end_post_castle(end)[0]
+        rook_end = self.get_king_rook_end_post_castle(end)[1]
         self.move(start,king_end)
         self.move(end,rook_end)
 
@@ -401,6 +412,7 @@ class ChessBoard():
             color_to_move = players[self.turn_count%2]
             print(f"{color_to_move} to move")
             self.run_movement_handling(color_to_move)
+            print("heres board:", self.to_string())
             print("turn_count",self.turn_count)
             self.check_and_execute_win_state()
             self.turn_count += 1
