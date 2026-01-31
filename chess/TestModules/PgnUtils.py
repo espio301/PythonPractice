@@ -8,7 +8,12 @@ class PgnGame():
 
     def to_string(self):
         return f"termination: {self.termination}, result: {self.result}, moves: {self.moves}"
+    
+    def get_moves(self):
+        return self.moves
 
+    def get_result(self):
+        return self.result
 
 class PgnParser():
     def __init__(self, file_name):
@@ -17,20 +22,30 @@ class PgnParser():
         self.file = file_name
         self.fields = {"termination", "result"}
 
+    def to_string(self):
+        output = f"parser data: position - {self.position}, file - {self.file}, fields to obtain - {self.fields}\n"
+        for g in self.games:
+            output += f"{g.to_string()}\n\n"
+        return output
+
     def parse_file(self):
+        print("parsing")
         for i in range(50):
             info = self.read_section()
             moves = self.read_section()
-            
             parsed_info = self.parse_info(info)
             parsed_moves = self.parse_moves(moves)
-            self.games.append(PgnGame(parsed_info["termination"], parsed_info["result"], parsed_moves))
-
-        for g in self.games:
-            print()
-            print()
-            print(g.to_string())
+            game = PgnGame(parsed_info["termination"], parsed_info["result"], parsed_moves)
+            if self.is_checkmate_game(game): # or game.get_result() == "1/2-1/2": (when we can sort on stalemates)
+                print("parse_file info: ", info)
+                print("parse_file: moves: ", moves)
+                print("parse_file: game.to_string", game.to_string())
+                self.games.append(game)
         
+    def is_checkmate_game(self, game):
+        moves = game.get_moves()
+        return "#" in moves[-1]
+
     def read_section(self):
         output = ""
         with open(self.file) as f:
@@ -64,13 +79,12 @@ class PgnParser():
         parsed_moves = []
         moves = move_data.split("{")
         for data in moves:
-            move_index = -2
             if "\n" in data:
-                data = data[:-1]
-                move_index = -1
+                continue
+            move_index = -2
             data = data.split(" ")
             parsed_moves.append(data[move_index])
         return parsed_moves
 
-parser = PgnParser(sys.argv[1])
-parser.parse_file()
+    def get_games(self):
+        return self.games

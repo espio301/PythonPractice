@@ -141,6 +141,7 @@ class InputHandler():
     def get_notation_coords(self,color):
         while True:
             user_in = self.get_notation_input()
+            print("get_notation_coords: ", user_in)
             if user_in in SPECIAL_CODES:
                 return [user_in]
             coords = self.decode_chess_notation(user_in, color)
@@ -157,12 +158,18 @@ class InputHandler():
                 return user_in
             if len(user_in) < 2:
                 continue
-            if 'x' in user_in:
-                user_in.replace("x", "")
+            user_in = self.sanitize_extra_notations(user_in)
             return user_in
 
+    def sanitize_extra_notations(self, user_in):
+        user_in = user_in.replace("x", "")
+        user_in = user_in.replace("+", "")
+        user_in = user_in.replace("#", "")
+        print("sanitizing extra input: ", user_in)
+        return user_in
+
     def decode_chess_notation(self, user_in, color):
-        if user_in == "0-0" or user_in == "0-0-0":
+        if user_in == "O-O" or user_in == "O-O-O":
             return self.algebraic_castling_converter(user_in, color)
         print("decode_chess_notation statement: ","=" in user_in, (self.is_pawn(user_in) and self.is_at_end(user_in)))
         if "=" in user_in or (self.is_pawn(user_in) and self.is_at_end(user_in)):
@@ -203,10 +210,10 @@ class InputHandler():
         return '1' in user_in or '8' in user_in
 
     def is_pawn(self, user_in):
-        return user_in[0].upper() not in CHESS_NOTATION_TO_TYPE
+        return user_in[0] not in CHESS_NOTATION_TO_TYPE
 
     def algebraic_castling_converter(self, user_in, color):
-        castle_coords = {"0-0-0": [0,0], "0-0": [0,7]}
+        castle_coords = {"O-O-O": [0,0], "O-O": [0,7]}
         king_coord = [0,4]
         castle_coord = castle_coords[user_in]
         if color == "white":

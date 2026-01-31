@@ -1,6 +1,10 @@
 from PieceModules.Piece import Piece
 from BoardModules.ChessBoard import ChessBoard
 from typing import List
+from io import StringIO
+from contextlib import redirect_stdout
+import sys
+
 
 class TestHelpers:
     def assert_equal_elements(self, list_one, list_two):
@@ -30,3 +34,25 @@ class TestHelpers:
                             [0,0,0,0,0,0,0,0],\
                             [0,0,0,0,0,0,0,0]]
         return chessboard
+
+    def write_seek_new_stdin(self, write_string):
+        sys.stdin = StringIO()
+        sys.stdin.write(write_string)
+        sys.stdin.seek(0)
+
+    def silent_run(self, func, func_in = None):
+        output = StringIO()
+        func_output = None
+        with redirect_stdout(output):
+            if func_in != None:
+                func_output = func(func_in)
+            else:
+                func_output = func()
+        return func_output
+
+    def get_stdout_of_func(self, func):
+        print("starting get_stdout_of_func")
+        output = StringIO()
+        with redirect_stdout(output):
+            func()
+        return output.getvalue()

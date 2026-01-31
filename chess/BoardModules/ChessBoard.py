@@ -82,18 +82,11 @@ class ChessBoard():
         return board
 
     def create_initial_king_row(self, color):
-        initialized_row = [Rook(color, [0,0]), Knight(color, [0,0]), Bishop(color, [0,0]), Queen(color, [0,0]), King(color, [0,0]), Bishop(color,[0,0]), Knight(color,[0,0]), Rook(color,[0,0])]
         row = 0
- #       column = 0
         if color == "white":
             row = LEN_SIDE - 1
- #       for piece in initialized_row:
- #           piece.set_coords([row, column])
- #           column += 1
         return [Rook(color, [row,0]), Knight(color, [row,1]), Bishop(color, [row,2]), Queen(color, [row,3]), King(color, [row,4]), Bishop(color,[row,5]), Knight(color,[row,6]), Rook(color,[row,7])]
-#        return initialized_row
     
-#castling - 
     def create_pawn_row(self, color):
         initialized_row = []
         row = 1
@@ -399,13 +392,18 @@ class ChessBoard():
                 self.board[start[0]][end[1]] = 0
         self.pawn_promotion_handler()
         self.board_states.append(self.to_string())
-#
+
+    def is_pawn_to_promote(self, coords, color):
+        if (color == "white" and coords[0] == 0) or (color == "black" and coords[0] == 7) and isinstance(self.board[coords[0]][coords[1]], Pawn):
+            return True
+        return False
+
     def pawn_promotion_handler(self):
         all_pieces = self.get_pieces_for_color("white") + self.get_pieces_for_color("black")
         for piece in all_pieces:
             color = piece.get_color()
             coords = piece.get_coords()
-            if (color == "white" and coords[0] == 0) or (color == "black" and coords[0] == 7):
+            if self.is_pawn_to_promote(coords, color):
                 piece_type = self.input_handler.get_user_pawn_promo_input()
                 piece = piece_type(color, [0,0])
                 self.board[coords[0]][coords[1]] = piece
@@ -420,6 +418,7 @@ class ChessBoard():
 
     def run_movement_handling(self, moving_color):
         from_to_coords = self.input_handler.get_movement_coords(moving_color)
+        print("here's from_to_coords: ", from_to_coords)
         self.movement_handler(from_to_coords[0], from_to_coords[1])
         self.add_move_history(from_to_coords)
 
