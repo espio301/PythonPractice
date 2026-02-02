@@ -30,23 +30,27 @@ class PgnParser():
 
     def parse_file(self):
         print("parsing")
-        for i in range(50):
+
+        while True:
             info = self.read_section()
+            if info == "":
+                break
             moves = self.read_section()
             parsed_info = self.parse_info(info)
             parsed_moves = self.parse_moves(moves)
             print("parse_file", parsed_info, parsed_moves)
             game = PgnGame(parsed_info["termination"], parsed_info["result"], parsed_moves)
-            print("parse_file game,checkmate game:",game.to_string(), self.is_checkmate_game(game))
-            if self.is_checkmate_game(game): # or game.get_result() == "1/2-1/2": (when we can sort on stalemates)
+            #print("parse_file game,checkmate game:",game.to_string(), self.is_checkmate_game(game))
+            print("here",game.get_moves(), game.get_moves() == [])
+            if game.get_moves() != [] and self.is_checkmate_game(game): # or game.get_result() == "1/2-1/2": (when we can sort on stalemates)
                 print("parse_file info: ", info)
                 print("parse_file: moves: ", moves)
                 print("parse_file: game.to_string", game.to_string())
                 self.games.append(game)
 
-        
     def is_checkmate_game(self, game):
         moves = game.get_moves()
+        print("is checkmate game:", moves)
         return "#" in moves[-1]
 
     def read_section(self):
@@ -54,9 +58,11 @@ class PgnParser():
         with open(self.file) as f:
             f.seek(self.position)
             line = f.readline()
-            while line != "\n":
+            while line != "\n" and line != "":
                 output += line
                 line = f.readline()
+                #print(line, line == "")
+
             self.position = f.tell()
         return output
               
