@@ -178,7 +178,7 @@ class InputHandler():
             user_in = self.set_pawn_promo_type(user_in)
             print("decode_chess_notation 1:", self.pawn_promo_type)
         pieces = {"R":Rook, "N":Knight, "B":Bishop, "Q":Queen, "K":King}
-        piece = user_in[0].upper()
+        piece = user_in[0]
         piece_type = None
         disambiguator = None
         if len(user_in) == 2:

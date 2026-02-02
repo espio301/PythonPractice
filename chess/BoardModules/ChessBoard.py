@@ -141,7 +141,7 @@ class ChessBoard():
         origin_tile = self.board[origin[0]][origin[1]]
         end_tile = self.board[end[0]][end[1]]
 
-        print(self.to_string())
+        #print(self.to_string())
         print("checking types and colors")
         print(not self.is_coords_are_types_and_colors([origin, end], [King,Rook], ["white", "white"]), not self.is_coords_are_types_and_colors([origin, end], [King,Rook], ["black", "black"]))
         if not self.is_coords_are_types_and_colors([origin, end], [King,Rook], ["white", "white"]) and not self.is_coords_are_types_and_colors([origin, end], [King,Rook], ["black", "black"]):
@@ -385,13 +385,13 @@ class ChessBoard():
         if self.is_valid_castle_movement(start,end):
             self.castle_movement_handler(start, end)
         else:
-            self.move(start,end)
             if self.is_en_passant(start,end):
                 print("start and end:")
                 print(start[0],end[0])
                 self.board[start[0]][end[1]] = 0
+            self.move(start,end)
         self.pawn_promotion_handler()
-        self.board_states.append(self.to_string())
+        #self.board_states.append(self.to_string())
 
     def is_pawn_to_promote(self, coords, color):
         if (color == "white" and coords[0] == 0) or (color == "black" and coords[0] == 7) and isinstance(self.board[coords[0]][coords[1]], Pawn):
@@ -436,7 +436,7 @@ class ChessBoard():
             color_to_move = players[self.turn_count%2]
             print(f"{color_to_move} to move")
             self.run_movement_handling(color_to_move)
-            print("heres board:", self.to_string())
+            #print("heres board:", self.to_string())
             print("turn_count",self.turn_count)
             self.check_and_execute_win_state()
             self.turn_count += 1
