@@ -10,12 +10,16 @@ class Pawn(Piece):
         self.move_history = [coordinates]
         self.ranks_moved = 0
 
+
     def set_coords(self, coords):
         past_coords = self.coordinates
         self.ranks_moved += abs(past_coords[0]-coords[0])
         self.coordinates = coords
         self.remove_pawn_ummoved_pattern()
         self.move_history.append(coords)
+
+    def get_move_history(self):
+        return self.move_history
 
     def remove_pawn_ummoved_pattern(self):
         if [2,0] in self.move_patterns:
@@ -26,7 +30,7 @@ class Pawn(Piece):
     def get_ranks_moved(self):
         return self.ranks_moved
 
-    def get_exception_patterns(self):
+    def get_attack_patterns(self):
         if self.color == "white":
             return [[-1,1],[-1,-1]]
         else:

@@ -75,7 +75,13 @@ class ChessBoard():
                 if isinstance(self.board[r][c],Piece):
                     piece = self.board[r][c]
                     type_piece = type(self.board[r][c])
-                    row.append(type_piece(piece.get_color(), piece.get_coords()))
+                    copy_piece = type_piece(piece.get_color(), piece.get_coords())
+                    if (isinstance(piece, Rook) or isinstance(piece, King)) and piece.get_has_moved():
+                        copy_piece.set_coords([r,c])
+                    if isinstance(piece, Pawn) and piece.get_ranks_moved() > 0:
+                        for coords in piece.get_move_history():
+                            copy_piece.set_coords(coords)
+                    row.append(copy_piece)
                 else:
                     row.append(0)
             board.append(row)
@@ -107,6 +113,7 @@ class ChessBoard():
         piece = self.board[start_coords[0]][start_coords[1]]
         attacked_coords = self.get_attacked_coords(piece)
         for end_coords in attacked_coords:
+            print("piece_can_uncheck king: ", self.is_valid_movement(start_coords, end_coords), self.is_valid_movement(start_coords, end_coords) and self.is_legal_move_via_checked_state(start_coords, end_coords))
             if self.is_valid_movement(start_coords, end_coords) and self.is_legal_move_via_checked_state(start_coords, end_coords):
                 return True
         return False
@@ -132,7 +139,11 @@ class ChessBoard():
         origin_color = origin_piece.get_color()
         if self.is_coord_is_out_of_bounds(end) or self.is_banned_pawn_movement(origin,end) or self.is_piece_in_the_way(origin,end):
             return False
-        if not self.coord_is_piece_and_is_color(end, origin_color) and origin_piece.is_valid_move_pattern(end) and self.is_legal_move_via_checked_state(origin, end) or self.is_valid_castle_movement(origin,end):
+        board_state_one = self.to_string()
+        #print("is_valid_movement - is legal move via checked state : ", self.is_legal_move_via_checked_state(origin, end))
+        board_state_two = self.to_string()
+        #print("checking diffs", board_state_one == board_state_two, board_state_one, board_state_two)
+        if ((not self.coord_is_piece_and_is_color(end, origin_color)) and origin_piece.is_valid_move_pattern(end) and self.is_legal_move_via_checked_state(origin, end)) or self.is_valid_castle_movement(origin,end):
             return True
         return False
 
@@ -180,7 +191,7 @@ class ChessBoard():
             return False
         if self.is_en_passant(origin,end):
             return False
-        if delta in piece.get_exception_patterns() and not self.coord_is_piece_and_is_color(end, OPPOSITE_COLOR[piece.get_color()]):
+        if delta in piece.get_attack_patterns() and not self.coord_is_piece_and_is_color(end, OPPOSITE_COLOR[piece.get_color()]):
             return True
         if delta in [[1,0],[-1,0]] and self.board[end[0]][end[1]] != 0:
             return True
@@ -189,7 +200,7 @@ class ChessBoard():
     def is_en_passant(self, origin, end):
         piece = self.board[origin[0]][origin[1]]
         enemy_pawn = self.board[origin[0]][end[1]]
-        if isinstance(piece, Pawn):
+        if isinstance(piece, Pawn) and isinstance(enemy_pawn, Pawn):
             print("checking en passant piece instances:", isinstance(piece, Pawn), isinstance(enemy_pawn,Pawn), piece.is_valid_move_pattern(end), origin, end)
         else:
             print("checking en passant piece instances:", isinstance(piece, Pawn), isinstance(enemy_pawn,Pawn), origin, end)
@@ -245,6 +256,7 @@ class ChessBoard():
         return delta
 
     def is_color_in_checkmate(self, color):
+        print("is_color_in_checkmate :", color, self.to_string(),"\n", "color is in check :",self.is_color_in_check(color), "king of color is not moveable:", not self.is_king_of_color_moveable(color), "the threat is not takeable:", not self.is_threat_takeable(color))
         if self.is_color_in_check(color) and not self.is_king_of_color_moveable(color) and not self.is_threat_takeable(color):
             return True
         return False
@@ -261,7 +273,8 @@ class ChessBoard():
         for piece in pieces:
             start = piece.get_coords()
             end = threats[0].get_coords()
-            if self.is_valid_movement(start,end):
+            print("is threat takeable, start end is valid movement:", start, end, self.is_valid_movement(start,end))
+            if self.piece_can_uncheck_king(start):
                 return True
 
         #check if piece in pieces has valid move to the threat
@@ -321,6 +334,9 @@ class ChessBoard():
         for piece in other_color_pieces:
             if self.piece_can_take_coord(piece, king_coords):
                 threats.append(piece)
+        print("get threats to king:")
+        for i in threats:
+            print(i.get_coords())
         return threats
 
     def get_pieces_for_color(self, color):
@@ -344,10 +360,15 @@ class ChessBoard():
             for c in range(LEN_SIDE):
                 if self.coord_is_piece_and_is_color([r,c], color) and isinstance(self.board[r][c], King):
                     return [r,c]
+        print("get_king_of_color_coords")
+        print(self.to_string())
+        print("about to raise exception for no king")
         raise Exception("There is no king for this color on the board")
 
     def get_attacked_coords(self, piece):
         move_patterns = piece.get_move_patterns()
+        if isinstance(piece, Pawn):
+            move_patterns = piece.get_attack_patterns()
         attacked_coords = []
         piece_coords = piece.get_coords()
         for pattern in move_patterns:
@@ -394,7 +415,10 @@ class ChessBoard():
         #self.board_states.append(self.to_string())
 
     def is_pawn_to_promote(self, coords, color):
-        if (color == "white" and coords[0] == 0) or (color == "black" and coords[0] == 7) and isinstance(self.board[coords[0]][coords[1]], Pawn):
+        print("is_pawn_to_promote : ", (color == "white" and coords[0] == 0) or (color == "black" and coords[0] == 7), isinstance(self.board[coords[0]][coords[1]], Pawn))
+        print("is_pawn_to_promote : ", (color == "white" and coords[0] == 0) or (color == "black" and coords[0] == 7) and isinstance(self.board[coords[0]][coords[1]], Pawn))
+
+        if ((color == "white" and coords[0] == 0) or (color == "black" and coords[0] == 7)) and isinstance(self.board[coords[0]][coords[1]], Pawn):
             return True
         return False
 
@@ -405,6 +429,8 @@ class ChessBoard():
             coords = piece.get_coords()
             if self.is_pawn_to_promote(coords, color):
                 piece_type = self.input_handler.get_user_pawn_promo_input()
+                print("pawn_promotion_handler is pawn to promote: ", self.is_pawn_to_promote(coords, color), piece_type, coords, color,  "\n", self.to_string())
+
                 piece = piece_type(color, [0,0])
                 self.board[coords[0]][coords[1]] = piece
                 piece.set_coords(coords)
