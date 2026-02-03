@@ -444,6 +444,9 @@ class ChessBoard():
 
     def run_movement_handling(self, moving_color):
         from_to_coords = self.input_handler.get_movement_coords(moving_color)
+        print("run_movement_handling, from to coords : ", from_to_coords)
+        if from_to_coords == [-1,-1]:
+            return -1
         print("here's from_to_coords: ", from_to_coords)
         self.movement_handler(from_to_coords[0], from_to_coords[1])
         self.add_move_history(from_to_coords)
@@ -461,8 +464,8 @@ class ChessBoard():
             print(self.to_string())
             color_to_move = players[self.turn_count%2]
             print(f"{color_to_move} to move")
-            self.run_movement_handling(color_to_move)
-            #print("heres board:", self.to_string())
+            if self.run_movement_handling(color_to_move) == -1:
+                break
             print("turn_count",self.turn_count)
             self.check_and_execute_win_state()
             self.turn_count += 1

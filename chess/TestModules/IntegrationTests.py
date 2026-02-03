@@ -1,3 +1,4 @@
+import traceback
 from BoardModules.ChessBoard import ChessBoard
 import sys
 from TestModules.PgnUtils import PgnParser, PgnGame
@@ -5,6 +6,7 @@ from TestModules.TestHelpers import TestHelpers
 from BoardModules.ChessBoard import ChessBoard
 from io import StringIO
 from contextlib import redirect_stdout
+import traceback
 ENGINE_OUTPUT_FILE = "chess_engine_out.txt"
 
 class IntegrationTests():
@@ -31,8 +33,8 @@ class IntegrationTests():
         try:
             with redirect_stdout(output):
                 chessboard.game_loop()
-        except:
-            print("exception occured in game: ", game.to_string())
+        except Exception as e:
+            print("exception occured in game: ", game.to_string(), e, traceback.format_exc())
         finally:
             with open(ENGINE_OUTPUT_FILE ,'a') as sys.stdout:
                 print(output.getvalue())

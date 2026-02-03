@@ -10,16 +10,17 @@ from PieceModules.Pawn import Pawn
 LEN_SIDE = 8
 OPPOSITE_COLOR = {"white":"black", "black":"white"}
 CHESS_NOTATION_LETTER_CONVERTER = {"a":0, "b":1, "c":2, "d":3, "e":4, "f":5, "g":6, "h":7}
-SPECIAL_CODES = {"cancel", "cnotation", "ftnotation"}
+SPECIAL_CODES = {"cancel", "cnotation", "ftnotation", "exit"}
 CHESS_NOTATION_TO_TYPE = {"R":Rook, "N":Knight, "B":Bishop, "Q":Queen, "K":King}
 class InputHandler():
     def __init__(self, chessboard : 'BoardModules.ChessBoard'):
         self.chessboard = chessboard
         self.notation_mode = True
         self.pawn_promo_type = None
+        self.force_exit = False
 
     def get_movement_coords(self, color):
-        while True:
+        while not self.force_exit:
             print(self.notation_mode)
             coords = []
             if self.notation_mode:
@@ -31,6 +32,7 @@ class InputHandler():
                 self.special_code_handler(coords)
                 continue
             return coords
+        return [-1,-1]
 
     def get_from_to_coords(self,color):
         while self.notation_mode == False:
@@ -42,8 +44,8 @@ class InputHandler():
 
     def special_code_handler(self,codes):
         for code in codes:
-            if code == "cancel":
-                return
+            if code == "exit":
+                self.force_exit = True
             if code == "cnotation":
                 self.notation_mode = True
             if code == "ftnotation":
