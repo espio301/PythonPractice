@@ -10,6 +10,7 @@ import traceback
 ENGINE_OUTPUT_FILE = "chess_engine_out.txt"
 
 class IntegrationTests():
+
     def run_tests(self):
         open(ENGINE_OUTPUT_FILE, 'w')
         input_file = sys.argv[1]
@@ -43,6 +44,8 @@ class IntegrationTests():
                 print(output.getvalue())
             sys.stdout = sys.__stdout__
             print("there was an invalid entry - ", "invalid entry, please re-enter\n" in output.getvalue())
+            if game.ends_checkmated() or chessboard.get_winner() == "1/2-1/2": 
+                print("winners are appropriate: ", chessboard.get_winner() == game.get_result(),"chessboard winner:", chessboard.get_winner(), "game results:", game.get_result())
 
         
 

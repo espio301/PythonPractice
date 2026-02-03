@@ -30,7 +30,7 @@ class ChessBoard():
         self.board_states = []
         self.move_history = []
         self.input_handler = InputModule.InputHandler(self)
-
+        self.winner = ""
 
     def create_initial_board(self):
         board = []
@@ -55,6 +55,9 @@ class ChessBoard():
             row_entries.append(" | ".join(column_entries))
         self.add_row_col_indices(row_entries)
         return "\n".join(row_entries)
+
+    def get_winner(self):
+        return self.winner
 
     def add_row_col_indices(self, row_entries):
         index_to_letter = {0:"a", 1:"b", 2:"c", 3:"d", 4:"e", 5:"f", 6:"g", 7:"h"}
@@ -382,12 +385,16 @@ class ChessBoard():
     def check_and_execute_win_state(self):
         if self.is_color_in_checkmate("white"):
             print("black wins!")
+            self.winner = "0-1"
             self.game_is_over = True
         if self.is_color_in_checkmate("black"):
+            self.winner = "1-0"
             print("white wins!")
             self.game_is_over = True
         if self.stalemate_checker() and not self.game_is_over:
             print("stalemate")
+            self.winner = "1/2-1/2"
+            self.game_is_over = True
 
     def stalemate_checker(self):
         return self.is_color_have_valid_moves("white") or self.is_color_have_valid_moves("black") or self.is_stalemate_via_board_states()
@@ -469,6 +476,7 @@ class ChessBoard():
             print("turn_count",self.turn_count)
             self.check_and_execute_win_state()
             self.turn_count += 1
+
 
 if __name__ == "__main__":
     board = ChessBoard()

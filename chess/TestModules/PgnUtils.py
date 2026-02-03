@@ -15,6 +15,10 @@ class PgnGame():
     def get_result(self):
         return self.result
 
+    def ends_checkmated(self):
+        return self.moves != [] and "#" in self.moves[-1]
+
+
 class PgnParser():
     def __init__(self, file_name, frmt):
         self.games = []
@@ -50,9 +54,7 @@ class PgnParser():
                 self.games.append(game)
 
     def is_checkmate_game(self, game):
-        moves = game.get_moves()
-        print("is checkmate game:", moves)
-        return moves != [] and "#" in moves[-1]
+        return game.ends_checkmated()
 
     def read_section(self):
         output = ""
@@ -66,16 +68,17 @@ class PgnParser():
         return output
               
     def parse_info(self, info):
-        if self.format == "custom":
-            return {"termination":"custom", "result":"custom"}
-        info = info.split("\n")
         info_map = {}
+        if self.format == "custom":
+            info_map = {"termination":"custom", "result":"custom"}
+        info = info.split("\n")
         for line in info:
             if line == "":
                 continue
             field = self.get_field(line).lower()
             if field in self.fields:
                 info_map[field] = self.get_value(line)
+        print("parse_info:", info_map)
         return info_map
 
     def get_field(self, line):
@@ -117,7 +120,6 @@ class PgnParser():
         for move_line in moves:
             output += move_line.split(" ")
         return output
-
 
     def is_result(self, move):
         return "1-0" in move or "0-1" in move or "1/2-1/2" in move
