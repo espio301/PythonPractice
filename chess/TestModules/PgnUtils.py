@@ -16,11 +16,12 @@ class PgnGame():
         return self.result
 
 class PgnParser():
-    def __init__(self, file_name):
+    def __init__(self, file_name, frmt):
         self.games = []
         self.position = 0
         self.file = file_name
         self.fields = {"termination", "result"}
+        self.format = frmt
 
     def to_string(self):
         output = f"parser data: position - {self.position}, file - {self.file}, fields to obtain - {self.fields}\n"
@@ -29,8 +30,8 @@ class PgnParser():
         return output
 
     def parse_file(self):
-        print("parsing")
-
+        print(f"parsing {self.file} mode {self.format}")
+        
         while True:
             info = self.read_section()
             if info == "":
@@ -42,7 +43,7 @@ class PgnParser():
             game = PgnGame(parsed_info["termination"], parsed_info["result"], parsed_moves)
             #print("parse_file game,checkmate game:",game.to_string(), self.is_checkmate_game(game))
             print("here",game.get_moves(), game.get_moves() == [])
-            if game.get_moves() != [] and self.is_checkmate_game(game): # or game.get_result() == "1/2-1/2": (when we can sort on stalemates)
+            if game.get_moves() != []: # or game.get_result() == "1/2-1/2": (when we can sort on stalemates)
                 print("parse_file info: ", info)
                 print("parse_file: moves: ", moves)
                 print("parse_file: game.to_string", game.to_string())
@@ -51,7 +52,7 @@ class PgnParser():
     def is_checkmate_game(self, game):
         moves = game.get_moves()
         print("is checkmate game:", moves)
-        return "#" in moves[-1]
+        return moves != [] and "#" in moves[-1]
 
     def read_section(self):
         output = ""
@@ -61,12 +62,12 @@ class PgnParser():
             while line != "\n" and line != "":
                 output += line
                 line = f.readline()
-                #print(line, line == "")
-
             self.position = f.tell()
         return output
               
     def parse_info(self, info):
+        if self.format == "custom":
+            return {"termination":"custom", "result":"custom"}
         info = info.split("\n")
         info_map = {}
         for line in info:
@@ -85,6 +86,9 @@ class PgnParser():
         return line.split("\"")[1]
 
     def parse_moves(self, move_data):
+        if self.format == "custom":
+            move_list = self.custom_parse_moves(move_data)
+            return self.add_potential_exit(move_list)
         parsed_moves = []
         moves = move_data.split("{")
         for data in moves:
@@ -93,7 +97,35 @@ class PgnParser():
             move_index = -2
             data = data.split(" ")
             parsed_moves.append(data[move_index])
+        parsed_moves = self.add_potential_exit(parsed_moves)
         return parsed_moves
+
+    def custom_parse_moves(self, moves):
+        moves = self.separate_moves(moves)
+        output = []
+        for move in moves:
+            if move == '' or self.is_result(move) or move == '' or (move[0].isdigit() and move.replace(".", "").isdigit()):
+                continue
+            else:
+                move = move.split(".")[-1]
+            output.append(move)
+        return output
+
+    def separate_moves(self, moves):
+        output = []
+        moves = moves.split("\n")
+        for move_line in moves:
+            output += move_line.split(" ")
+        return output
+
+
+    def is_result(self, move):
+        return "1-0" in move or "0-1" in move or "1/2-1/2" in move
+
+    def add_potential_exit(self, moves):
+        if not self.is_checkmate_game(PgnGame("N/A", "N/A", moves)):
+            return moves + ["exit"]
+        return moves
 
     def get_games(self):
         return self.games

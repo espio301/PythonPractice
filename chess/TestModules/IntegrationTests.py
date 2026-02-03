@@ -10,10 +10,13 @@ import traceback
 ENGINE_OUTPUT_FILE = "chess_engine_out.txt"
 
 class IntegrationTests():
-    #PgnParser()
     def run_tests(self):
         open(ENGINE_OUTPUT_FILE, 'w')
-        parser = PgnParser(sys.argv[1])
+        input_file = sys.argv[1]
+        frmt = ""
+        if len(sys.argv) == 3:
+            frmt = sys.argv[2]
+        parser = PgnParser(input_file, frmt)
         parser.parse_file()
         print("integrationtests: ",parser.to_string())
         for game in parser.get_games():
