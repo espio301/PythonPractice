@@ -320,7 +320,6 @@ class ChessBoard():
         piece_coords = piece.get_coords()
         for pattern in piece.get_move_patterns():
             potential_moves.append([piece_coords[0] + pattern[0], piece_coords[1] + pattern[1]])
-        
         return potential_moves
 
     def is_coord_is_out_of_bounds(self, coord):
@@ -398,7 +397,42 @@ class ChessBoard():
 
     def stalemate_checker(self):
         print("stalemate_checker :", self.is_stalemate_via_board_states() )
-        return self.is_color_have_valid_moves("white") or self.is_color_have_valid_moves("black") or self.is_stalemate_via_board_states()
+        return self.is_color_have_valid_moves("white") or self.is_color_have_valid_moves("black") or self.is_stalemate_via_board_states() or self.is_stalemate_via_materials()
+
+    def is_stalemate_via_materials(self):
+        white_pcs = self.get_pieces_encoding("white")
+        black_pcs = self.get_pieces_encoding("black")
+        lack_mats_cases = {(1,0,0,0,0,0), (1,0,1,0,0,0), (1,0,0,1,0,0)}
+        pieces_lack_mats = white_pcs in lack_mats_cases and black_pcs in lack_mats_cases
+        is_king_vs_two_knights = (white_pcs == (1,0,0,0,0,0) and black_pcs == (1,0,0,2,0,0)) or (black_pcs == (1,0,0,0,0,0) and white_pcs == (1,0,0,2,0,0))
+
+        if white_pcs == (1,0,1,0,0,0) and black_pcs == (1,0,1,0,0,0):
+            return self.is_bishop_vs_bishop_stalemate()
+        return pieces_lack_mats or is_king_vs_two_knights
+
+    def is_bishop_vs_bishop_stalemate(self):
+        white_pieces = self.get_pieces_for_color("white")
+        black_pieces = self.get_pieces_for_color("black")
+        tile_color = None
+        for piece in white_pieces + black_pieces:
+            if type(piece) == Bishop:
+                if tile_color == None:
+                    tile_color = self.get_tile_color(piece.get_coords())
+                else:
+                    return tile_color == self.get_tile_color(piece.get_coords())
+
+    def get_tile_color(self, coords):
+        if (coords[0]+coords[1])%2 == 0:
+            return "white"
+        return "black"
+
+    def get_pieces_encoding(self, color):
+        piece_index = {King:0, Queen:1, Bishop:2, Knight:3, Rook:4, Pawn:5}
+        pieces_encoding = [0,0,0,0,0,0]
+        for piece in self.get_pieces_for_color(color):
+            i = piece_index[type(piece)]
+            pieces_encoding[i] += 1
+        return tuple(pieces_encoding)
 
     def is_stalemate_via_board_states(self):
         board_states_map = {}

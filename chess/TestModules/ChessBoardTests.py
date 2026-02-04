@@ -41,6 +41,7 @@ class ChessBoardTests:
         self.is_valid_castle_movement_test()
         self.is_color_have_valid_moves_test()
         self.get_user_pawn_promo_input_test()
+        self.is_stalemate_via_materials_test()
         print("finished with ChessBoard tests")
 
     def assert_first_last_row_correctness(self):
@@ -87,7 +88,9 @@ class ChessBoardTests:
     def create_move_into_pawn_promo_board(self):
         return TestHelpers().create_board_from_pieces([King("white", [7,0]), King("black", [0,0]), Pawn("white", [1,6]), Pawn("black", [6,6]), Knight("white", [7,7])])
 
-    #TODO refactor these to the helper class
+
+
+
     def write_seek_new_stdin(self, write_string):
         sys.stdin = StringIO()
         sys.stdin.write(write_string)
@@ -335,3 +338,42 @@ a    b    c    d    e    f    g    h    """
         self.write_seek_new_stdin("f8=B\nexit\n")
         self.silent_run(chessboard.game_loop)
         assert type(chessboard.board[0][5]) == Bishop
+
+    def is_stalemate_via_materials_test(self):
+        self.check_bishop_king_vs_bishop_king()
+        self.check_bishop_king_vs_king()
+        self.check_king_vs_king()
+        self.check_king_knight_vs_king()
+        self.check_king_vs_two_knights()
+        self.check_non_stalemate_situations()
+    
+    def check_bishop_king_vs_bishop_king(self):
+        chessboard = TestHelpers().create_board_from_pieces([King("white", [7,0]), King("black", [0,0]), Bishop("white", [2,2]), Bishop("black", [3,3])])
+        print(chessboard.to_string())
+        assert chessboard.is_stalemate_via_materials()
+    
+    def check_bishop_king_vs_king(self):
+        chessboard = TestHelpers().create_board_from_pieces([King("white", [7,0]), King("black", [0,0]), Bishop("white", [2,2])])
+        assert chessboard.is_stalemate_via_materials()
+
+    def check_king_vs_king(self):
+        chessboard = TestHelpers().create_board_from_pieces([King("white", [7,0]), King("black", [0,0])])
+        assert chessboard.is_stalemate_via_materials()
+    
+    def check_king_knight_vs_king(self):
+        chessboard = TestHelpers().create_board_from_pieces([King("white", [7,0]), King("black", [0,0]), Knight("black", [3,3])])
+        assert chessboard.is_stalemate_via_materials()
+
+    def check_king_vs_two_knights(self):
+        chessboard = TestHelpers().create_board_from_pieces([King("white", [7,0]), King("black", [0,0]), Knight("black", [3,3]), Knight("black",[4,4])])
+        assert chessboard.is_stalemate_via_materials()
+    
+    def check_non_stalemate_situations(self):
+        knight_pawn = TestHelpers().create_board_from_pieces([King("white", [7,0]), King("black", [0,0]), Knight("black", [3,3]), Pawn("black",[4,4])])
+        two_knights_pawn = TestHelpers().create_board_from_pieces([King("white", [7,0]), King("black", [0,0]), Knight("black", [3,3]), Knight("black",[4,4]), Pawn("black", [5,5])])
+        bishop_vs_bishop = TestHelpers().create_board_from_pieces([King("white", [7,0]), King("black", [0,0]), Knight("black", [3,3]), Bishop("white",[3,3]), Bishop("black", [3,4])])
+        assert not knight_pawn.is_stalemate_via_materials() and not two_knights_pawn.is_stalemate_via_materials() and not bishop_vs_bishop.is_stalemate_via_materials()
+
+
+
+
