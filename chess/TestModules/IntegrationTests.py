@@ -30,7 +30,6 @@ class IntegrationTests():
         print("test_game get moves: ", game.get_moves())
         for move in game.get_moves():
             move_string += f"{move}\n"
-        print(f"test_game: adding {move_string} to stdin")
         helpers.write_seek_new_stdin(move_string)
         output = StringIO()
         print("starting game loop on this game:", game.to_string())
@@ -47,7 +46,6 @@ class IntegrationTests():
             if game.ends_checkmated() or chessboard.get_winner() == "1/2-1/2": 
                 print("winners are appropriate: ", chessboard.get_winner() == game.get_result(),"chessboard winner:", chessboard.get_winner(), "game results:", game.get_result())
 
-        
 
 tests = IntegrationTests()
 tests.run_tests()

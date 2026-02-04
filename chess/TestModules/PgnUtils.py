@@ -38,6 +38,7 @@ class PgnParser():
         
         while True:
             info = self.read_section()
+            print("parse_file info: ",info)
             if info == "":
                 break
             moves = self.read_section()

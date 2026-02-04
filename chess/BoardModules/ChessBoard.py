@@ -397,6 +397,7 @@ class ChessBoard():
             self.game_is_over = True
 
     def stalemate_checker(self):
+        print("stalemate_checker :", self.is_stalemate_via_board_states() )
         return self.is_color_have_valid_moves("white") or self.is_color_have_valid_moves("black") or self.is_stalemate_via_board_states()
 
     def is_stalemate_via_board_states(self):
@@ -405,8 +406,9 @@ class ChessBoard():
             if state not in board_states_map:
                 board_states_map[state] = 0
             board_states_map[state] += 1
-            if board_states_map[state] >= 3:
+            if board_states_map[state] >= 5:
                 return True
+        print("stalemate_checker:",board_states_map, self.board_states)
         return False
 
     def movement_handler(self, start, end):
@@ -419,7 +421,7 @@ class ChessBoard():
                 self.board[start[0]][end[1]] = 0
             self.move(start,end)
         self.pawn_promotion_handler()
-        #self.board_states.append(self.to_string())
+        self.board_states.append(self.to_string())
 
     def is_pawn_to_promote(self, coords, color):
         print("is_pawn_to_promote : ", (color == "white" and coords[0] == 0) or (color == "black" and coords[0] == 7), isinstance(self.board[coords[0]][coords[1]], Pawn))

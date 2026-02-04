@@ -1,2 +1,5 @@
 #!/bin/bash
-python3 -m TestModules.IntegrationTests /Users/espio301/Projects/chess/TestModules/PgnFiles/lichess_db_standard_rated_2025-12.pgn
+if [ -f /integration_test_output.txt ]; then
+    rm /integration_test_output.txt
+fi
+python3 -m TestModules.IntegrationTests TestModules/PgnFiles/customFile.pgn custom > integration
