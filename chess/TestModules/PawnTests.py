@@ -27,4 +27,4 @@ class PawnTests:
         assert white_pawn.get_move_patterns() == [[-1,-1], [-1,1], [-1,0]]
 
     def get_exception_patterns_test(self):
-        assert Pawn("white", [0,0]).get_exception_patterns() == [[1,1], [-1,-1], [1,-1], [-1,1]]
+        assert Pawn("white", [0,0]).get_attack_patterns() == [[-1,1],[-1,-1]]

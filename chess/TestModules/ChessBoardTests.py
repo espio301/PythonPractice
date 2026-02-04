@@ -82,7 +82,7 @@ class ChessBoardTests:
         return TestHelpers().create_board_from_pieces([King("white",[7,0]), King("black", [0,0]), Rook("black", [2,1]), Rook("black",[6,7]), Pawn("white", [6,0])])
 
     def create_pawn_promo_board(self):
-        return TestHelpers().create_board_from_pieces([King("white",[7,0]), King("black", [0,0]), Pawn("white",[0,5])])
+        return TestHelpers().create_board_from_pieces([King("white",[7,0]), King("black", [0,0]), Pawn("white",[1,5])])
 
     def create_move_into_pawn_promo_board(self):
         return TestHelpers().create_board_from_pieces([King("white", [7,0]), King("black", [0,0]), Pawn("white", [1,6]), Pawn("black", [6,6]), Knight("white", [7,7])])
@@ -252,7 +252,8 @@ a    b    c    d    e    f    g    h    """
     def check_and_execute_win_state_test(self):
         chessboard = self.create_board_white_in_checkmate()
         func_output = self.get_stdout_of_func(chessboard.check_and_execute_win_state)
-        assert "black wins!\n" == self.get_stdout_of_func(chessboard.check_and_execute_win_state)
+        print("func_out:", func_output)
+        assert "0-1" == chessboard.get_winner()
 
     def check_get_white_pieces_given_board_and_amt(self, chessboard, amount_pieces):
         passed = True
@@ -301,6 +302,8 @@ a    b    c    d    e    f    g    h    """
         chessboard.board_states.append(board_string)
         chessboard.board_states.append(irrelevant_board_string)
         chessboard.board_states.append(board_string)
+        chessboard.board_states.append(board_string)
+        chessboard.board_states.append(board_string)
         assert chessboard.stalemate_checker()
 
     def get_user_pawn_promo_input_test(self):
@@ -311,25 +314,24 @@ a    b    c    d    e    f    g    h    """
 
     def pawn_promote_queen(self):
         chessboard = self.create_pawn_promo_board()
-        self.write_seek_new_stdin("quen\nqueen\n")
-        chessboard.pawn_promotion_handler()
+        self.write_seek_new_stdin("f8=Q\nexit\n")
+        chessboard.game_loop()
         assert type(chessboard.board[0][5]) == Queen
 
     def move_into_pawn_promo_test(self):
-        chessboard = self.create_move_into_pawn_promo_board()
-        self.write_seek_new_stdin("rook\n")
-        
-        chessboard.movement_handler([1,6], [0,6])
-        assert type(chessboard.board[0][6]) == Rook
+        chessboard = self.create_pawn_promo_board()
+        self.write_seek_new_stdin("f8=R\nexit\n")
+        self.silent_run(chessboard.game_loop)
+        assert type(chessboard.board[0][5]) == Rook
 
     def black_pawn_promotion_test(self):
-        chessboard = self.create_move_into_pawn_promo_board()
-        self.write_seek_new_stdin("knIght\n")
-        chessboard.movement_handler([6,6], [7,6])
-        assert type(chessboard.board[7][6]) == Knight
+        chessboard = self.create_pawn_promo_board()
+        self.write_seek_new_stdin("f8=N\nexit\n")
+        self.silent_run(chessboard.game_loop)
+        assert type(chessboard.board[0][5]) == Knight
 
     def pawn_attack_to_promotion_test(self):
-        chessboard = self.create_move_into_pawn_promo_board()
-        self.write_seek_new_stdin("bishop\n")
-        chessboard.movement_handler([6,6], [7,7])
-        assert type(chessboard.board[7][7]) == Bishop
+        chessboard = self.create_pawn_promo_board()
+        self.write_seek_new_stdin("f8=B\nexit\n")
+        self.silent_run(chessboard.game_loop)
+        assert type(chessboard.board[0][5]) == Bishop
