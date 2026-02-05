@@ -108,7 +108,15 @@ class InputHandler():
             return user_in[0].isalpha()
         if len(user_in) == 4:
             return user_in[0].isupper() and (user_in[1].isdigit() or user_in[1].islower())
+        if len(user_in) == 5:
+            return self.is_double_disambiguator_format(user_in)
         return False
+
+    def is_double_disambiguator_format(self, user_in):
+        if len(user_in) != 5:
+            return False
+        print("is_double_disambiguator_format:",user_in[0] in CHESS_NOTATION_TO_TYPE, self.is_sanitary_notation_tile(user_in[1]+user_in[2]), self.is_sanitary_notation_tile(user_in[3]+user_in[4]))
+        return user_in[0] in CHESS_NOTATION_TO_TYPE and self.is_sanitary_notation_tile(user_in[1]+user_in[2]) and self.is_sanitary_notation_tile(user_in[3]+user_in[4])
 
     def is_sanitary_col_or_row(self, c):
         if c.isdigit():
@@ -120,7 +128,6 @@ class InputHandler():
 
 
     def letter_and_number_within_bounds(self, letter, number):
-#        print("letter and num in bounds: ", letter >= 'a', letter <= 'h', number.isdigit(), int(number) <= LEN_SIDE, int(number) >= 1)
         return letter >= 'a' and letter <= 'h' and number.isdigit() and int(number) <= LEN_SIDE and int(number) >= 1
 
     def convert_input_to_coords(self, user_in):
@@ -216,6 +223,8 @@ class InputHandler():
         return user_in
 
     def decode_chess_notation(self, user_in, color):
+        if user_in == self.is_double_disambiguator_format(user_in):
+            return self.algebraic_double_disambiguator_converter(user_in)
         if user_in == "O-O" or user_in == "O-O-O":
             return self.algebraic_castling_converter(user_in, color)
         print("decode_chess_notation statement: ","=" in user_in, (self.is_pawn(user_in) and self.is_at_end(user_in)))
@@ -239,6 +248,13 @@ class InputHandler():
         if len(user_in) > 3:
             disambiguator = user_in[1]
         return self.algebraic_notation_converter(piece_type, disambiguator, user_in[len(user_in) - 2:], color)
+
+    def algebraic_double_disambiguator_converter(self, user_in):
+        print("algebraic_double_disambiguator_converter:", user_in)
+        start = self.convert_input_to_coords(user_in[1]+user_in[2])
+        end = self.convert_input_to_coords(user_in[3]+user_in[4])
+        print("algebraic_double_disambiguator_converter:", user_i, start, end)
+        return [start,end]
 
     def set_pawn_promo_type(self, user_in):
         pieces = {"R":Rook, "N":Knight, "B":Bishop, "Q":Queen, "K":King}

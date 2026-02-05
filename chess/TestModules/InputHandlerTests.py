@@ -19,6 +19,7 @@ class InputHandlerTests():
         self.get_user_piece_to_move_test()
         self.is_moving_non_king_in_check_test()
         self.get_user_move_to_coords_test()
+        self.algebraic_double_disambiguator_converter_test()
         print("finished input handler tests")
 
 
@@ -49,6 +50,8 @@ class InputHandlerTests():
     def create_pawn_in_way_of_rook(self):
         return TestHelpers().create_board_from_pieces([Pawn("black", [3,1]),Pawn("white",[4,0]),Rook("white",[7,0]), King("white",[7,1]), King("black",[0,7])])
 
+    def create_three_attacking_queens(self):
+        return TestHelpers().create_board_from_pieces([Queen("white", [3,3]),Queen("white",[5,3]),Queen("white",[5,6]), King("white",[7,7]), King("black",[0,7])])
 
 
     def convert_input_to_coords_test(self):
@@ -129,3 +132,30 @@ class InputHandlerTests():
         self.write_seek_new_stdin("6,1\n6,0\n")
         chessboard = self.create_pawn_in_way_of_rook()
         assert self.silent_run(InputHandler(chessboard).get_user_move_to_coords, [7,0]) == [6,0]
+
+    def algebraic_double_disambiguator_converter_test(self):
+        self.assert_basic_double_disambiguator_valid()
+        self.assert_invalid_double_disambiguator_converter_test()
+        self.assert_valid_double_disambiguator_converter_test()
+
+    def assert_basic_double_disambiguator_valid(self):
+        double_disambig_board = ChessBoard()
+        self.write_seek_new_stdin("Ng1f3\nexit\n")
+        double_disambig_board.game_loop()
+        chessboard = ChessBoard()
+        self.write_seek_new_stdin("Nf3\nexit\n")
+        chessboard.game_loop()
+        assert double_disambig_board.to_string() == chessboard.to_string()
+
+    def assert_invalid_double_disambiguator_converter_test(self):
+        self.write_seek_new_stdin("Nggf3\nexit\n")
+        modified_board = ChessBoard()
+        modified_board.game_loop()
+        assert modified_board.to_string() == ChessBoard().to_string()
+
+    def assert_valid_double_disambiguator_converter_test(self):
+        start_board = TestHelpers().create_board_from_pieces([Queen("white", [3,3]),Queen("white",[5,3]),Queen("white",[5,6]), King("white",[7,7]), King("black",[0,7])])
+        end_board = TestHelpers().create_board_from_pieces([Queen("white", [3,3]),Queen("white",[7,3]),Queen("white",[5,6]), King("white",[7,7]), King("black",[0,7])])
+        self.write_seek_new_stdin("Qd3d1\nexit\n")
+        start_board.game_loop()
+        assert start_board.to_string() == end_board.to_string()
