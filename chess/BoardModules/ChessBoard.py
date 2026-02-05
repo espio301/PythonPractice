@@ -235,6 +235,22 @@ class ChessBoard():
             delta.append(coord_delta)
         return delta
 
+    def filter_by_type(self, pieces, piece_type):
+        correct_types = []
+        for piece in pieces:
+            if isinstance(piece, piece_type):
+                correct_types.append(piece)
+        return correct_types
+        
+    def get_pieces_can_move_to_coord(self, pieces, end):
+        valid_movement_pieces = []
+        for piece in pieces:
+            print("algebraic_notation_converter piece in correct_types")
+            print("algebraic_notation_converter coords, endcoords, isvalid move:",piece.get_coords(),end, self.is_valid_movement(piece.get_coords(),end))
+            if self.is_valid_movement(piece.get_coords(), end):
+                valid_movement_pieces.append(piece)
+        return valid_movement_pieces
+
     def is_color_in_checkmate(self, color):
         print("is_color_in_checkmate :", color, self.to_string(),"\n", "color is in check :",self.is_color_in_check(color), "king of color is not moveable:", not self.is_king_of_color_moveable(color), "the threat is not takeable:", not self.is_threat_takeable(color))
         if self.is_color_in_check(color) and not self.is_king_of_color_moveable(color) and not self.is_threat_takeable(color):
@@ -393,7 +409,8 @@ class ChessBoard():
                     tile_color = self.get_tile_color(piece.get_coords())
                 else:
                     return tile_color == self.get_tile_color(piece.get_coords())
-
+        return False
+        
     def get_tile_color(self, coords):
         if (coords[0]+coords[1])%2 == 0:
             return "white"
