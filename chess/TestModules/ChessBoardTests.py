@@ -314,6 +314,13 @@ a    b    c    d    e    f    g    h    """
         self.silent_run(self.move_into_pawn_promo_test)
         self.silent_run(self.black_pawn_promotion_test)
         self.silent_run(self.pawn_attack_to_promotion_test)
+        self.silent_run(self.pawn_invalid_promo_input_test)
+
+    def pawn_invalid_promo_input_test(self):
+        chessboard = TestHelpers().create_board_from_pieces([King("white", [7,1]), King("black", [0,0]), Pawn("white",[1,7]), Pawn("black",[0,6])])
+        self.write_seek_new_stdin("g8=J\ng8==Q\ng8=Queen\nexit\n")
+        assert type(chessboard.board[1][7]) == Pawn
+        chessboard.game_loop()
 
     def pawn_promote_queen(self):
         chessboard = self.create_pawn_promo_board()
@@ -373,8 +380,3 @@ a    b    c    d    e    f    g    h    """
         two_knights_pawn = TestHelpers().create_board_from_pieces([King("white", [7,0]), King("black", [0,0]), Knight("black", [3,3]), Knight("black",[4,4]), Pawn("black", [5,5])])
         bishop_vs_bishop = TestHelpers().create_board_from_pieces([King("white", [7,0]), King("black", [0,0]), Knight("black", [3,3]), Bishop("white",[3,3]), Bishop("black", [3,4])])
         assert not knight_pawn.is_stalemate_via_materials() and not two_knights_pawn.is_stalemate_via_materials() and not bishop_vs_bishop.is_stalemate_via_materials()
-
-
-
-
-#TODO make sure cant input bad pawn promo
