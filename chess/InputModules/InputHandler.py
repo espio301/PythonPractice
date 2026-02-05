@@ -33,7 +33,6 @@ class InputHandler():
             return coords
         return [-1,-1]
 
-
     def special_code_handler(self,codes):
         for code in codes:
             if code == "exit":
@@ -116,7 +115,6 @@ class InputHandler():
         print("coords to move to:")
         while True:
             destination = self.get_sanitized_coords()
-
             if isinstance(destination, str):
                 return destination
             if not self.chessboard.is_valid_movement(origin, destination):
@@ -145,7 +143,6 @@ class InputHandler():
         if user_in.lower() not in pawn_promo_piece:
             return None
         return pawn_promo_piece[user_in.lower()]
-
 
     def get_notation_coords(self,color):
         while True:
@@ -183,11 +180,9 @@ class InputHandler():
         print("decode_chess_notation user_in:", user_in, self.is_double_disambiguator_format(user_in))
         if self.is_double_disambiguator_format(user_in):
             return self.algebraic_double_disambiguator_converter(user_in)
-        if user_in == "O-O" or user_in == "O-O-O":
+        if  "O-O" in user_in:
             return self.algebraic_castling_converter(user_in, color)
-        if "=" in user_in or (self.is_pawn(user_in) and self.is_at_end(user_in)):
-            if not self.is_sanitary_promo_notation(user_in):
-                return None
+        if "=" in user_in:
             user_in = self.set_pawn_promo_type(user_in)
         disambiguator = self.get_disambiguator_piece_type(user_in)[0]
         piece_type = self.get_disambiguator_piece_type(user_in)[1]
