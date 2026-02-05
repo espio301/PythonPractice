@@ -15,6 +15,12 @@ class Rook(Piece):
     def set_coords(self, coordinates):
         self.coordinates = coordinates
         self.has_moved = True
+    
+    def copy(self):
+        copy_rook = super().copy()
+        if self.has_moved:
+            copy_rook.has_moved = True
+        return copy_rook
 
     def get_has_moved(self):
         return self.has_moved

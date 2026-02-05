@@ -356,7 +356,6 @@ a    b    c    d    e    f    g    h    """
     
     def check_bishop_king_vs_bishop_king(self):
         chessboard = TestHelpers().create_board_from_pieces([King("white", [7,0]), King("black", [0,0]), Bishop("white", [2,2]), Bishop("black", [3,3])])
-        print(chessboard.to_string())
         assert chessboard.is_stalemate_via_materials()
     
     def check_bishop_king_vs_king(self):

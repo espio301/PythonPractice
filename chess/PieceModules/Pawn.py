@@ -41,6 +41,11 @@ class Pawn(Piece):
             for i in range(2):
                 self.move_patterns[delta_index][i] = self.move_patterns[delta_index][i] * -1
 
-                
-
+    def copy(self):
+        copy_pawn = super().copy()
+        copy_pawn.ranks_moved = self.ranks_moved
+        copy_pawn.move_history = []
+        for i in self.move_history:
+            copy_pawn.move_history.append(i)
+        return copy_pawn
         

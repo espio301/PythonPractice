@@ -24,6 +24,13 @@ class Piece():
     def get_move_patterns(self):
         return self.move_patterns
 
+    def copy(self):
+        type_piece = type(self)
+        copy_coords = []
+        for i in self.coordinates:
+            copy_coords.append(i)
+        return type_piece(self.color, copy_coords)
+
     def is_valid_move_pattern(self, destination):
         movement_delta = []
         for i in range(2):

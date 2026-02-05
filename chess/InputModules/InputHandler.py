@@ -5,13 +5,12 @@ from PieceModules.Queen import Queen
 from PieceModules.King import King
 from PieceModules.Pawn import Pawn
 
-#how better should I have gone about special code handling
-
 LEN_SIDE = 8
 OPPOSITE_COLOR = {"white":"black", "black":"white"}
 CHESS_NOTATION_LETTER_CONVERTER = {"a":0, "b":1, "c":2, "d":3, "e":4, "f":5, "g":6, "h":7}
 SPECIAL_CODES = {"cancel", "cnotation", "ftnotation", "exit"}
 CHESS_NOTATION_TO_TYPE = {"R":Rook, "N":Knight, "B":Bishop, "Q":Queen, "K":King}
+
 class InputHandler():
     def __init__(self, chessboard : 'BoardModules.ChessBoard'):
         self.chessboard = chessboard
@@ -61,7 +60,7 @@ class InputHandler():
 
     def get_sanitized_coords(self):
         user_in = input()
-        while (not self.is_sanitary_coords(user_in) and not self.is_sanitary_notation_tile(user_in)) or user_in == "x":
+        while (not self.is_sanitary_coords(user_in) and not self.is_sanitary_notation_tile(user_in)):
             print(user_in, user_in)
             if user_in in SPECIAL_CODES:
                 return user_in
@@ -265,6 +264,8 @@ class InputHandler():
 
     def is_sanitary_promo_notation(self, user_in):
         print("is_sanitary_promo_notation: ", user_in)
+        if "=" not in user_in:
+            return False
         promo_input = user_in.split('=')[1]
         move_input = user_in.split('=')[0]
         print("is_sanitary_promo_notation: ", promo_input in CHESS_NOTATION_TO_TYPE, self.is_at_end(move_input), self.is_pawn(move_input))
