@@ -79,6 +79,8 @@ class InputHandler():
         return False
 
     def is_sanitary_notation(self, user_in):
+        if user_in == "O-O" or user_in == "O-O-O":
+            return True
         if '=' in user_in and not self.is_sanitary_promo_notation(user_in):
             return False
         user_in = self.sanitize_extra_notations(user_in.split('=')[0])
@@ -277,16 +279,16 @@ class InputHandler():
         for piece in all_pieces:
             if isinstance(piece, piece_type):
                 correct_types.append(piece)
-#        print(all_pieces)
-#        print(correct_types)
+        print(all_pieces)
+        print(correct_types)
         for piece in correct_types:
-#            print("algebraic_notation_converter piece in correct_types")
-#            print(piece.get_coords(),end_coords, self.chessboard.is_valid_movement(piece.get_coords(),end_coords))
+            print("algebraic_notation_converter piece in correct_types")
+            print("algebraic_notation_converter coords, endcoords, isvalid move:",piece.get_coords(),end_coords, self.chessboard.is_valid_movement(piece.get_coords(),end_coords))
             if self.chessboard.is_valid_movement(piece.get_coords(),end_coords):
                 valid_movement_pieces.append(piece)
         if len(valid_movement_pieces) == 0:
             return None
-#        print("algebraic_notation_converter valid movement pieces: ", valid_movement_pieces)
+        print("algebraic_notation_converter valid movement pieces: ", valid_movement_pieces)
         if disambiguator != None:
             disambig_int = 0
             disambig_is_row = disambiguator.isdigit()
@@ -300,16 +302,13 @@ class InputHandler():
 
             for piece in valid_movement_pieces:
                 pce_coords = piece.get_coords()
-#                print("algebraic_notation_converter disambig index:", disambig_index, "pce coords: ", pce_coords, "disambig_int:", disambig_int, "pce_coords[disambig_index] == disambig_int", pce_coords[disambig_index] == disambig_int)
+                print("algebraic_notation_converter disambig index:", disambig_index, "pce coords: ", pce_coords, "disambig_int:", disambig_int, "pce_coords[disambig_index] == disambig_int", pce_coords[disambig_index] == disambig_int)
                 if pce_coords[disambig_index] == disambig_int:
-#                    print("checking notation converter")
-#                    print(piece_type, disambiguator, end, color)
-#                    print(pce_coords, end_coords)
+                    print("checking notation converter")
+                    print(piece_type, disambiguator, end, color)
+                    print(pce_coords, end_coords)
                     return [pce_coords,end_coords]
-#            print("algebraic_notation_converter - vars")
-#            print(piece_type, disambiguator, end, color)
-#        print("algebraic_notation_converter - vars2" )
-#        print(piece_type, disambiguator, end, color)
+            return None
         if len(valid_movement_pieces) > 1 and disambiguator == None:
             print("some impossible move happened: ",valid_movement_pieces, disambiguator,"\n",self.chessboard.to_string())
             raise Exception("some impossible move happened: ",valid_movement_pieces, disambiguator,"\n",self.chessboard.to_string())
