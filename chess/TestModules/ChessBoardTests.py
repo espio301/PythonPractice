@@ -377,3 +377,4 @@ a    b    c    d    e    f    g    h    """
 
 
 
+#TODO make sure cant input bad pawn promo
