@@ -379,3 +379,31 @@ a    b    c    d    e    f    g    h    """
         two_knights_pawn = TestHelpers().create_board_from_pieces([King("white", [7,0]), King("black", [0,0]), Knight("black", [3,3]), Knight("black",[4,4]), Pawn("black", [5,5])])
         bishop_vs_bishop = TestHelpers().create_board_from_pieces([King("white", [7,0]), King("black", [0,0]), Knight("black", [3,3]), Bishop("white",[3,3]), Bishop("black", [3,4])])
         assert not knight_pawn.is_stalemate_via_materials() and not two_knights_pawn.is_stalemate_via_materials() and not bishop_vs_bishop.is_stalemate_via_materials()
+
+class TestObj:
+    def __init__(self, param_map):
+        self.test_func = param_map["test_func"]
+        self.user_in = param_map["user_in"]
+        self.chessboard_in = param_map["chessboard_in"]
+        self.expected_out = param_map["expected_out"]
+
+class UnitTests:
+    def __init__(self):
+        self.test_cases = self.get_test_objs()
+
+    def get_test_objs(self):
+        return [ \
+            TestObj( 
+            { \
+                "test_func": "is_stalemate_via_materials",\
+                "user_in": "", \
+                "chessboard_in": TestHelpers().create_board_from_pieces([King("white", [7,0]), King("black", [0,0]), Knight("black", [3,3])]), \
+                "expected_out": True \
+            }) \
+        ]
+
+    def run_all(self):
+        for case in self.test_cases:
+            assert getattr(case.chessboard_in, case.test_func)() == case.expected_out
+
+UnitTests().run_all()
